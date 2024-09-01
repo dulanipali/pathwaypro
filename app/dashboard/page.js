@@ -1,12 +1,27 @@
-'use client';
-
-import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, Button, IconButton } from '@mui/material';
+'use client'
+import { useState } from 'react';
+import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, Button, IconButton, TextField } from '@mui/material';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { ContentCopy, CloudUpload, Logout } from '@mui/icons-material';
+import axios from 'axios';
 
 export default function DashboardPage() {
     const { user } = useUser();
     const { signOut } = useClerk();
+    const [jobDescription, setJobDescription] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleSaveDescription = async () => {
+        try {
+            const response = await axios.post('/api/jobdescription', {
+                jobDescription,
+                userId: user.id,
+            });
+            setMessage(response.data.message);
+        } catch (error) {
+            setMessage('Failed to save job description');
+        }
+    };
 
     return (
         <Container
@@ -75,9 +90,23 @@ export default function DashboardPage() {
                         <Typography variant="h6" sx={{ mb: 2 }}>
                             [Paste your job description here]
                         </Typography>
-                        <Button variant="contained" color="warning" sx={{ mt: 2 }}>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
+                        />
+                        <Button variant="contained" color="warning" sx={{ mt: 2 }} onClick={handleSaveDescription}>
                             Save Description
                         </Button>
+                        {message && (
+                            <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
+                                {message}
+                            </Typography>
+                        )}
                     </Box>
                     <Box
                         sx={{

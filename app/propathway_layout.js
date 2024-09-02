@@ -72,7 +72,7 @@ export default function Layout({ children }) {
                             }
                         }}
                     >
-                        <MenuItem onClick={handleCloseNavMenu} sx={{ color: 'white', textAlign: 'left' }}>
+                        <MenuItem onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white', textAlign: 'left' }}>
                             <Typography>Dashboard</Typography>
                         </MenuItem>
                         <MenuItem onClick={() => handleNavigation('/track')} sx={{ color: 'white', textAlign: 'left' }}>

@@ -25,6 +25,9 @@ export default function DashboardPage() {
 
     return (
         <Layout>
+            <Typography variant="h4" sx={{ color: 'white', fontFamily: "'Lato', sans-serif", mb: 4 }}>
+                Hi {user?.firstName}, Welcome to ProPathway!
+            </Typography>
             <Box
                 display="flex"
                 flexDirection="row"

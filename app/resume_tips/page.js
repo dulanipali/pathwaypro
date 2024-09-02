@@ -1,14 +1,35 @@
 'use client'
+import { useState } from 'react';
 import Layout from "../propathway_layout";
 import { Box, Typography, Button } from "@mui/material";
 import { useRouter } from 'next/navigation';
 
-
 export default function ResumeTips() {
+    const [tips, setTips] = useState('');
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const handleNavigation = (path) => {
-        router.push(path);
+    const handleGetTips = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    jobDescription: 'Your saved job description here', // Fetch from your saved data
+                    resume: 'Your uploaded resume content here', // Fetch from your saved data
+                }),
+            });
+
+            const data = await response.json();
+            setTips(data.tips || 'No tips available');
+        } catch (error) {
+            console.error('Failed to fetch resume tips:', error);
+            setTips('Failed to fetch resume tips');
+        }
+        setLoading(false);
     };
 
     return (
@@ -45,11 +66,23 @@ export default function ResumeTips() {
                         color: 'white',
                         border: '2px solid #0055A4',
                     }}
-                >   <Typography variant="h6" sx={{ mb: 2 }}>
+                >
+                    <Typography variant="h6" sx={{ mb: 2 }}>
                         Resume Tips
                     </Typography>
+                    {loading ? (
+                        <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
+                            Generating tips...
+                        </Typography>
+                    ) : (
+                        <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
+                            {tips}
+                        </Typography>
+                    )}
+                    <Button variant="contained" color="info" sx={{ mt: 2 }} onClick={handleGetTips}>
+                        Get Resume Tips
+                    </Button>
                 </Box>
-
             </Box>
             <Button
                 variant="contained"
@@ -60,5 +93,5 @@ export default function ResumeTips() {
                 Interview Prep
             </Button>
         </Layout>
-    )
+    );
 }

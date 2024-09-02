@@ -1,158 +1,265 @@
 'use client'
+import { useState } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  IconButton,
+} from "@mui/material";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
+
 import Layout from "../propathway_layout";
-import Scheduler from "react-mui-scheduler";
-import { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 
-export default function Calendar() {
-    const [events, setEvents] = useState([
-        {
-            id: "event-1",
-            label: "Medical consultation",
-            groupLabel: "Dr Shaun Murphy",
-            user: "Dr Shaun Murphy",
-            color: "#f28f6a",
-            startHour: "04:00 AM",
-            endHour: "05:00 AM",
-            date: "2024-09-05",
-            createdAt: new Date(),
-            createdBy: "Kristina Mayer"
-        },
-        // More initial events if necessary
-    ]);
 
-    const [state] = useState({
-        options: {
-            transitionMode: "zoom", // or fade
-            startWeekOn: "mon",     // or sun
-            defaultMode: "month",   // or week | day | timeline
-            minWidth: 540,
-            maxWidth: 540,
-            minHeight: 540,
-            maxHeight: 540
-        },
-        alertProps: {
-            open: true,
-            color: "info",          // info | success | warning | error
-            severity: "info",       // info | success | warning | error
-            message: "🚀 Let's start with awesome react-mui-scheduler 🔥 🔥 🔥",
-            showActionButton: true,
-            showNotification: true,
-            delay: 1500
-        },
-        toolbarProps: {
-            showSearchBar: true,
-            showSwitchModeButtons: true,
-            showDatePicker: true
-        }
-    });
+const tokens = {
+  orange: '#EB5E28',
+  darkBlue: '#001F54',
+  textPrimary: '#000000', 
+  textSecondary: '#4A4A4A',
+};
 
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [newEvent, setNewEvent] = useState({
-        label: '',
-        groupLabel: '',
-        user: '',
-        color: '#f28f6a', // Default color, can be customized
-        startHour: '',
-        endHour: '',
-        date: ''
-    });
+const Calendar = () => {
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false); 
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [deletingEventId, setDeletingEventId] = useState(null); 
 
-    const handleEventsChange = (updatedEvents) => {
-        // We won't use this for now, but it's here if needed in the future
+  const handleDateClick = (selected) => {
+    setSelectedDate(selected.date);
+    setNewEventTitle("");
+    setIsOpen(true);
+  };
+
+  const handleEventClick = (selected) => {
+    setDeletingEventId(selected.event.id); 
+    setIsOpen(true);
+  };
+
+  const handleDeleteEvent = () => {
+    setCurrentEvents(currentEvents.filter((event) => event.id !== deletingEventId));
+    setIsOpen(false); 
+    setDeletingEventId(null); 
+  };
+
+  const handleAddEvent = () => {
+    if (!selectedDate || !newEventTitle) return;
+
+    const newEvent = {
+      id: `${new Date().toISOString()}-${newEventTitle}`,
+      title: newEventTitle,
+      start: selectedDate,
+      allDay: true, 
     };
 
-    const handleAddEvent = () => {
-        setEvents([
-            ...events,
-            {
-                ...newEvent,
-                id: `event-${events.length + 1}`,
-                createdAt: new Date(),
-                createdBy: "Current User" // Replace with actual user data if needed
-            }
-        ]);
-        setIsDialogOpen(false);
-        setNewEvent({ label: '', groupLabel: '', user: '', color: '#f28f6a', startHour: '', endHour: '', date: '' });
-    };
+    setCurrentEvents([...currentEvents, newEvent]);
+    setIsOpen(false);
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewEvent(prevState => ({ ...prevState, [name]: value }));
-    };
+  const openHelpDialog = () => {
+    setHelpDialogOpen(true);
+  };
 
-    return (
-        <Layout>
-            <Button variant="contained" onClick={() => setIsDialogOpen(true)}>Add Event</Button>
-            
-            <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-                <DialogTitle>Add New Event</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Event Label"
-                        name="label"
-                        fullWidth
-                        value={newEvent.label}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Group Label"
-                        name="groupLabel"
-                        fullWidth
-                        value={newEvent.groupLabel}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="User"
-                        name="user"
-                        fullWidth
-                        value={newEvent.user}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Start Hour (e.g., 09:00 AM)"
-                        name="startHour"
-                        fullWidth
-                        value={newEvent.startHour}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="End Hour (e.g., 10:00 AM)"
-                        name="endHour"
-                        fullWidth
-                        value={newEvent.endHour}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Date (e.g., 2024-09-05)"
-                        name="date"
-                        fullWidth
-                        value={newEvent.date}
-                        onChange={handleInputChange}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleAddEvent}>Add Event</Button>
-                </DialogActions>
-            </Dialog>
+  const closeHelpDialog = () => {
+    setHelpDialogOpen(false);
+  };
 
-            <Scheduler
-                locale="en"
-                events={events}
-                legacyStyle={false}
-                options={state?.options}
-                alertProps={state?.alertProps}
-                toolbarProps={state?.toolbarProps}
-                onEventsChange={handleEventsChange}
+  return (
+    <Layout> {/* Wrap the content with Layout */}
+      <Box display="flex" sx={{ height: 'calc(100vh - 64px)', overflow: 'hidden', padding: '0' }}>
+        {/* CALENDAR SIDEBAR */}
+        <Box
+          sx={{
+            width: "20%", // Increase the sidebar width to give space for buttons
+            backgroundColor: tokens.darkBlue,
+            padding: "15px",
+            borderRadius: "8px",
+            color: tokens.textPrimary,
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            overflowY: 'auto', // Allow scrolling if the content exceeds height
+          }}
+        >
+          <Box>
+            <Typography variant="h5" sx={{ marginBottom: '20px', color: '#FFFFFF' }}>Events</Typography>
+            <List>
+              {currentEvents.map((event) => (
+                <ListItem
+                  key={event.id}
+                  sx={{
+                    backgroundColor: tokens.orange,
+                    margin: "10px 0",
+                    borderRadius: "4px",
+                    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    padding: '10px',
+                    "&:hover": {
+                      backgroundColor: tokens.textSecondary,
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={event.title}
+                    primaryTypographyProps={{ sx: { color: tokens.textPrimary, fontSize: '16px' } }}
+                    secondary={
+                      <Typography sx={{ color: tokens.textPrimary, fontSize: '14px' }}>
+                        {new Date(event.start).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </Typography>
+                    }
+                  />
+                  <Button
+                    variant="outlined"
+                    sx={{ color: tokens.textPrimary, borderColor: tokens.textPrimary, marginTop: '10px', alignSelf: 'center' }}
+                    onClick={() => handleEventClick({ event })}
+                  >
+                    Delete
+                  </Button>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+          {/* Help Button */}
+          <Box sx={{ marginTop: '20px' }}>
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: tokens.orange, color: '#FFFFFF', width: '100%' }}
+              startIcon={<HelpOutlineIcon />}
+              onClick={openHelpDialog}
+            >
+              How to Use Calendar
+            </Button>
+          </Box>
+        </Box>
+
+        {/* CALENDAR */}
+        <Box sx={{ flexGrow: 1, height: '100%', borderRadius: '8px', backgroundColor: '#FFFFFF', padding: '15px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
+          <FullCalendar
+            height="100%"
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title", // This ensures the month is displayed
+              right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth",
+            }}
+            titleFormat={{ year: 'numeric', month: 'long' }} 
+            initialView="dayGridMonth"
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            events={currentEvents} 
+            dateClick={handleDateClick}
+            eventDidMount={(info) => {
+              info.el.style.backgroundColor = tokens.orange;
+              info.el.style.color = '#FFFFFF'; 
+            }}
+            dayHeaderContent={({ date }) => (
+              <Typography sx={{ color: tokens.textPrimary }}>
+                {new Date(date).toLocaleDateString("en-US", { weekday: 'short' })}
+              </Typography>
+            )}
+            dayCellContent={({ date }) => (
+              <Typography sx={{ color: tokens.textPrimary }}>
+                {new Date(date).getDate()}
+              </Typography>
+            )}
+          />
+        </Box>
+
+        {/* DELETE EVENT DIALOG */}
+        <Dialog open={isOpen && deletingEventId !== null} onClose={() => setIsOpen(false)}>
+          <DialogTitle>Confirm Delete Event</DialogTitle>
+          <DialogContent sx={{ padding: '20px' }}>
+            <Typography>Are you sure you want to delete this event?</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsOpen(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleDeleteEvent} sx={{ color: tokens.orange }}>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* ADD EVENT DIALOG */}
+        <Dialog open={isOpen && !deletingEventId} onClose={() => setIsOpen(false)}>
+          <Box p="20px" sx={{ padding: '20px' }}>
+            <Typography variant="h6" gutterBottom>
+              Add New Event
+            </Typography>
+            <TextField
+              label="Event Title"
+              value={newEventTitle}
+              onChange={(e) => setNewEventTitle(e.target.value)}
+              fullWidth
+              variant="outlined"
+              margin="normal"
             />
-        </Layout>
-    );
-}
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: tokens.orange, color: '#FFFFFF', marginTop: '15px' }}
+              onClick={handleAddEvent}
+            >
+              Add Event
+            </Button>
+          </Box>
+        </Dialog>
+
+        {/* HELP DIALOG */}
+        <Dialog open={helpDialogOpen} onClose={closeHelpDialog}>
+          <DialogTitle>How to Use Calendar</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" gutterBottom>
+              Welcome to the Calendar! Here’s how you can use it:
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>1. Adding an Event:</strong> Click on any date on the calendar. A dialog will open where you can enter the event name. Click "Add Event" to save it.
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>2. Viewing Events:</strong> Events are listed on the left sidebar under "Events". You can see all events scheduled on the calendar.
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>3. Deleting an Event:</strong> To delete an event, click on the event in the sidebar, and then click the "Delete" button in the dialog that appears.
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>4. Navigating the Calendar:</strong> Use the navigation buttons at the top of the calendar to switch between months, weeks, or days.
+            </Typography>
+            <Typography variant="body2">
+              If you need more help, feel free to reach out to the support team!
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeHelpDialog} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </Layout> 
+  );
+};
+
+export default Calendar;

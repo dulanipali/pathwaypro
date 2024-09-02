@@ -1,15 +1,17 @@
 'use client'
 import { useState } from 'react';
 import { Typography, Box, Button, TextField } from '@mui/material';
-import { useUser, useClerk } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { ContentCopy, CloudUpload } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../propathway_layout';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
     const { user } = useUser();
     const [jobDescription, setJobDescription] = useState('');
     const [message, setMessage] = useState('');
+    const router = useRouter();
 
     const handleSaveDescription = async () => {
         try {
@@ -21,6 +23,10 @@ export default function DashboardPage() {
         } catch (error) {
             setMessage('Failed to save job description');
         }
+    };
+
+    const handleNavigation = (path) => {
+        router.push(path);
     };
 
     return (
@@ -85,7 +91,12 @@ export default function DashboardPage() {
                     <Typography variant="h6" sx={{ mb: 2 }}>
                         Upload your resume here
                     </Typography>
-                    <Button variant="contained" color="info" sx={{ mt: 2 }}>
+                    <Button
+                        variant="contained"
+                        color="info"
+                        sx={{ mt: 2 }}
+                        onClick={() => handleNavigation('/resume_tips')}
+                    >
                         Optimize Resume
                     </Button>
                 </Box>

@@ -17,7 +17,7 @@ export async function POST(req) {
         const prompt = `I have the following job description: ${jobDescription}\nAnd this resume: ${resume}\nCan you provide specific tips on how this resume can be improved to better match the job description?`;
 
         const response = await openai.createCompletion({
-            model: "gpt-4", // Use the model that suits your need
+            model: "gpt-4", 
             prompt,
             max_tokens: 500,
         });

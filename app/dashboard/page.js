@@ -1,32 +1,63 @@
-'use client'
+'use client';
 import { useState } from 'react';
 import { Typography, Box, Button, TextField } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
-import { ContentCopy, CloudUpload } from '@mui/icons-material';
+import { ContentCopy } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../propathway_layout';
 import { useRouter } from 'next/navigation';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from '../../firebase';  // Import Firebase
 
 export default function DashboardPage() {
     const { user } = useUser();
     const [jobDescription, setJobDescription] = useState('');
-    const [message, setMessage] = useState('');
+    const [resumeText, setResumeText] = useState('');
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const handleSaveDescription = async () => {
+    const saveResumeToFirebase = async (resumeText) => {
         try {
-            const response = await axios.post('/api/jobdescription', {
-                jobDescription,
-                userId: user.id,
+            await addDoc(collection(db, 'resumes'), {
+                userId: user?.id,
+                resumeText,
+                createdAt: new Date()
             });
-            setMessage(response.data.message);
+            console.log("Resume saved to Firebase");
         } catch (error) {
-            setMessage('Failed to save job description');
+            console.error("Error saving resume to Firebase:", error);
         }
     };
 
-    const handleNavigation = (path) => {
-        router.push(path);
+    const generateTips = async () => {
+        if (!resumeText || !jobDescription) {
+            alert("Please enter a job description and paste your resume text.");
+            return;
+        }
+
+        // Save resume text to Firebase
+        await saveResumeToFirebase(resumeText);
+
+        const formData = {
+            jobDescription,
+            resumeText
+        };
+
+        try {
+            setLoading(true);
+            const response = await axios.post('/api/generate', formData);
+            setLoading(false);
+
+            const tips = response.data.tips;
+            if (tips) {
+                router.push(`/resume_tips?tips=${encodeURIComponent(JSON.stringify(tips))}`);
+            } else {
+                alert("No tips were generated. Please try again.");
+            }
+        } catch (error) {
+            console.error('Failed to generate tips:', error);
+            setLoading(false);
+        }
     };
 
     return (
@@ -36,10 +67,10 @@ export default function DashboardPage() {
             </Typography>
             <Box
                 display="flex"
-                flexDirection="row"
-                justifyContent="space-around"
+                flexDirection="column"
+                justifyContent="center"
                 alignItems="center"
-                sx={{ width: '80%', maxWidth: '800px' }}
+                sx={{ width: '80%', maxWidth: '800px', mx: 'auto' }}
             >
                 <Box
                     sx={{
@@ -47,15 +78,16 @@ export default function DashboardPage() {
                         padding: '20px',
                         borderRadius: '10px',
                         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        width: '45%',
+                        width: '100%',
                         textAlign: 'center',
                         color: 'white',
                         border: '2px solid #EB5E28',
+                        mb: 4
                     }}
                 >
                     <ContentCopy sx={{ fontSize: 40, mb: 2 }} />
                     <Typography variant="h6" sx={{ mb: 2 }}>
-                        [Paste your job description here]
+                        Paste your job description here
                     </Typography>
                     <TextField
                         fullWidth
@@ -66,14 +98,6 @@ export default function DashboardPage() {
                         onChange={(e) => setJobDescription(e.target.value)}
                         sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
                     />
-                    <Button variant="contained" color="warning" sx={{ mt: 2 }} onClick={handleSaveDescription}>
-                        Save Description
-                    </Button>
-                    {message && (
-                        <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
-                            {message}
-                        </Typography>
-                    )}
                 </Box>
                 <Box
                     sx={{
@@ -81,26 +105,35 @@ export default function DashboardPage() {
                         padding: '20px',
                         borderRadius: '10px',
                         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        width: '45%',
+                        width: '100%',
                         textAlign: 'center',
                         color: 'white',
                         border: '2px solid #0055A4',
                     }}
                 >
-                    <CloudUpload sx={{ fontSize: 40, mb: 2 }} />
                     <Typography variant="h6" sx={{ mb: 2 }}>
-                        Upload your resume here
+                        Paste your resume text here
                     </Typography>
-                    <Button
-                        variant="contained"
-                        color="info"
-                        sx={{ mt: 2 }}
-                        onClick={() => handleNavigation('/resume_tips')}
-                    >
-                        Optimize Resume
-                    </Button>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={6}
+                        variant="outlined"
+                        value={resumeText}
+                        onChange={(e) => setResumeText(e.target.value)}
+                        sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
+                    />
                 </Box>
             </Box>
+            <Button
+                variant="contained"
+                color="info"
+                sx={{ mt: 4 }}
+                onClick={generateTips}
+                disabled={loading}
+            >
+                {loading ? 'Generating Tips...' : 'Generate Resume Tips'}
+            </Button>
         </Layout>
     );
 }

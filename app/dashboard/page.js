@@ -7,7 +7,12 @@ import axios from 'axios';
 import Layout from '../propathway_layout';
 import { useRouter } from 'next/navigation';
 import { collection, addDoc } from "firebase/firestore";
-import { db } from '../../firebase';  // Import Firebase
+import { db } from '../../firebase';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';  // Import the PDF.js core library
+import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.entry';  // Import the PDF.js worker
+import mammoth from 'mammoth';  // For Word document handling
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;  // Set up the worker
 
 export default function DashboardPage() {
     const { user } = useUser();
@@ -29,6 +34,43 @@ export default function DashboardPage() {
         } catch (error) {
             console.error("Error saving resume and job description to Firebase:", error);
             throw error;
+        }
+    };
+    
+    // Function to handle file upload and extract text
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+    
+        const fileType = file.type;
+        if (fileType === "application/pdf") {
+            // Handle PDF
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                const pdfData = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                let text = '';
+                // Start the loop at 1 since PDF pages are 1-indexed
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);  // Get page i (starts at 1)
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    text += `${pageText}\n`;
+                }
+                setResumeText(text);  // Set the extracted text as the resume text
+            };
+            fileReader.readAsArrayBuffer(file);
+        } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            // Handle Word DOCX
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                const arrayBuffer = this.result;
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                setResumeText(result.value);  // Mammoth extracts the text from DOCX
+            };
+            fileReader.readAsArrayBuffer(file);
+        } else {
+            alert("Please upload a PDF or Word document.");
         }
     };
     
@@ -55,7 +97,8 @@ export default function DashboardPage() {
     
             const tips = response.data.tips;
             if (tips) {
-                router.push(`/resume_tips?tips=${encodeURIComponent(JSON.stringify(tips))}`);
+                const encodedTips = encodeURIComponent(JSON.stringify(tips));  // Encode the tips for the query parameter
+                router.push(`/resume_tips?tips=${encodedTips}`);  // Pass tips in the query string
             } else {
                 alert("No tips were generated. Please try again.");
             }
@@ -65,8 +108,6 @@ export default function DashboardPage() {
         }
     };
     
-    
-
     return (
         <Layout>
             <Typography variant="h4" sx={{ color: 'white', fontFamily: "'Lato', sans-serif", mb: 4 }}>
@@ -79,6 +120,7 @@ export default function DashboardPage() {
                 alignItems="center"
                 sx={{ width: '80%', maxWidth: '800px', mx: 'auto' }}
             >
+                {/* Job Description Section */}
                 <Box
                     sx={{
                         backgroundColor: '#1A202C',
@@ -106,6 +148,8 @@ export default function DashboardPage() {
                         sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
                     />
                 </Box>
+                
+                {/* Resume File Upload Section */}
                 <Box
                     sx={{
                         backgroundColor: '#1A202C',
@@ -119,7 +163,16 @@ export default function DashboardPage() {
                     }}
                 >
                     <Typography variant="h6" sx={{ mb: 2 }}>
-                        Paste your resume text here
+                        Upload your resume (PDF or Word):
+                    </Typography>
+                    <input
+                        type="file"
+                        accept=".pdf, .docx"
+                        onChange={handleFileUpload}
+                        style={{ marginBottom: '16px', color: 'white' }}
+                    />
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                        Or paste your resume text below:
                     </Typography>
                     <TextField
                         fullWidth

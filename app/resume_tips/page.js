@@ -12,13 +12,19 @@ export default function ResumeTipsPage() {
     useEffect(() => {
         const tipsParam = searchParams.get('tips');
         if (tipsParam) {
-            const decodedTips = JSON.parse(decodeURIComponent(tipsParam));
-            console.log("Parsed Tips:", decodedTips);
-            setTips(decodedTips);
+            try {
+                const decodedTips = JSON.parse(decodeURIComponent(tipsParam));
+                console.log("Parsed Tips:", decodedTips);
+                setTips(decodedTips);
+            } catch (error) {
+                console.error("Error decoding tips parameter:", error);
+                setTips([]); // Set default empty tips in case of error
+            }
         } else {
             console.log("No tips found in query");
         }
     }, [searchParams]);
+    
 
     const handleInterviewPrep = () => {
         router.push('/interview_prep');

@@ -249,7 +249,7 @@ export default function ApplicationInsights() {
 
                                 <Box sx={{ mb: 3 }}>
                                     <Typography variant="h6" sx={{ color: '#FF6F42' }}>
-                                        Resume Text:
+                                        Resume:
                                     </Typography>
                                     <Typography variant="body1" sx={{ backgroundColor: '#f4f4f4', color: 'black', p: 2, borderRadius: '5px' }}>
                                         {selectedResume.resumeText}

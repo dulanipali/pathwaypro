@@ -15,7 +15,10 @@ export default function SavedResumes() {
             try {
                 const q = query(collection(db, 'resumes'), where("userId", "==", user?.id));
                 const querySnapshot = await getDocs(q);
-                const resumesList = querySnapshot.docs.map(doc => doc.data());
+                const resumesList = querySnapshot.docs.map(doc => ({
+                    id: doc.id,  // Add document ID
+                    ...doc.data() // Spread the rest of the document data
+                }));
                 setResumes(resumesList);
             } catch (error) {
                 console.error("Error fetching resumes:", error);
@@ -49,14 +52,42 @@ export default function SavedResumes() {
                 }}
             >
                 {resumes.length > 0 ? (
-                    resumes.map((resume, index) => (
-                        <Box key={index} sx={{ mb: 4, width: '100%', textAlign: 'left' }}>
+                    resumes.map((resume) => (
+                        <Box key={resume.id} sx={{ mb: 4, width: '100%', textAlign: 'left' }}>
+                            <Typography variant="h6" sx={{ color: '#FF6F42', mb: 1 }}>
+                                Job Description:
+                            </Typography>
+                            <Typography variant="body1" sx={{ backgroundColor: 'white', color: 'black', p: 2, borderRadius: '5px' }}>
+                                {resume.jobDescription}
+                            </Typography>
+
+                            <Typography variant="h6" sx={{ color: '#FF6F42', mt: 2 }}>
+                                Resume Text:
+                            </Typography>
                             <Typography variant="body1" sx={{ backgroundColor: 'white', color: 'black', p: 2, borderRadius: '5px' }}>
                                 {resume.resumeText}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: '#FF6F42', mt: 2, display: 'block' }}>
-                                Saved on: {new Date(resume.createdAt.seconds * 1000).toLocaleString()}
-                            </Typography>
+
+                            {resume.tips && resume.tips.length > 0 && (
+                                <>
+                                    <Typography variant="h6" sx={{ color: '#FF6F42', mt: 2 }}>
+                                        Resume Tips:
+                                    </Typography>
+                                    <Box sx={{ backgroundColor: '#333', p: 2, borderRadius: '5px', mt: 1 }}>
+                                        {resume.tips.map((tip, index) => (
+                                            <Typography key={index} variant="body2" sx={{ color: 'white', mb: 1 }}>
+                                                {tip}
+                                            </Typography>
+                                        ))}
+                                    </Box>
+                                </>
+                            )}
+
+                            {resume.createdAt && (
+                                <Typography variant="caption" sx={{ color: '#FF6F42', mt: 2, display: 'block' }}>
+                                    Saved on: {new Date(resume.createdAt.seconds * 1000).toLocaleString()}
+                                </Typography>
+                            )}
                         </Box>
                     ))
                 ) : (

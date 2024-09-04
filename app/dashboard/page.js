@@ -16,38 +16,43 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const saveResumeToFirebase = async (resumeText) => {
+    const saveResumeToFirebase = async (resumeText, jobDescription) => {
         try {
-            await addDoc(collection(db, 'resumes'), {
+            const docRef = await addDoc(collection(db, 'resumes'), {
                 userId: user?.id,
                 resumeText,
+                jobDescription,
                 createdAt: new Date()
             });
-            console.log("Resume saved to Firebase");
+            console.log("Resume and job description saved to Firebase with ID:", docRef.id);
+            return docRef;  // Return the document reference
         } catch (error) {
-            console.error("Error saving resume to Firebase:", error);
+            console.error("Error saving resume and job description to Firebase:", error);
+            throw error;
         }
     };
-
+    
+    
     const generateTips = async () => {
         if (!resumeText || !jobDescription) {
             alert("Please enter a job description and paste your resume text.");
             return;
         }
-
-        // Save resume text to Firebase
-        await saveResumeToFirebase(resumeText);
-
+    
+        // Save both resume text and job description to Firebase and get the document reference
+        const docRef = await saveResumeToFirebase(resumeText, jobDescription);
+    
         const formData = {
             jobDescription,
-            resumeText
+            resumeText,
+            documentId: docRef.id  // Pass the document ID to the API
         };
-
+    
         try {
             setLoading(true);
             const response = await axios.post('/api/generate', formData);
             setLoading(false);
-
+    
             const tips = response.data.tips;
             if (tips) {
                 router.push(`/resume_tips?tips=${encodeURIComponent(JSON.stringify(tips))}`);
@@ -59,6 +64,8 @@ export default function DashboardPage() {
             setLoading(false);
         }
     };
+    
+    
 
     return (
         <Layout>

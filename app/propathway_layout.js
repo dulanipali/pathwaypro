@@ -79,7 +79,7 @@ export default function Layout({ children }) {
                             <Typography>Track Applications</Typography>
                         </MenuItem>
                         <MenuItem onClick={() => handleNavigation('/resumes')} sx={{ color: 'white', textAlign: 'left' }}>
-                            <Typography>Saved Resumes</Typography>
+                            <Typography>Application Insights</Typography>
                         </MenuItem>
                         <MenuItem onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', textAlign: 'left' }}>
                             <Typography>Calendar</Typography>

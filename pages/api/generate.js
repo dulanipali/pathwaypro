@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from '../../firebase';  // Ensure Firebase is imported
 
 export default async function handler(req, res) {
     try {
@@ -6,10 +8,10 @@ export default async function handler(req, res) {
             return res.status(405).json({ error: 'Method not allowed' });
         }
 
-        const { jobDescription, resumeText } = req.body;
+        const { jobDescription, resumeText, documentId } = req.body;  // Accept the document ID
 
-        if (!jobDescription || !resumeText) {
-            return res.status(400).json({ error: 'Job description and resume text are required' });
+        if (!jobDescription || !resumeText || !documentId) {
+            return res.status(400).json({ error: 'Job description, resume text, and document ID are required' });
         }
 
         // Initialize OpenAI client
@@ -34,6 +36,10 @@ export default async function handler(req, res) {
         if (tips.length === 0) {
             return res.status(200).json({ tips: ["No tips were generated."] });
         }
+
+        // Update the Firestore document with the generated tips
+        const docRef = doc(db, 'resumes', documentId);  // Get the document reference
+        await updateDoc(docRef, { tips });
 
         // Send back the generated tips
         return res.status(200).json({ tips });

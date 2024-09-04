@@ -1,18 +1,18 @@
 'use client';
 import { useState } from 'react';
-import { Typography, Box, Button, TextField } from '@mui/material';
+import { Typography, Box, Button, TextField, CircularProgress } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
-import { ContentCopy } from '@mui/icons-material';
+import { ContentCopy, UploadFile } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../propathway_layout';
 import { useRouter } from 'next/navigation';
 import { collection, addDoc } from "firebase/firestore";
 import { db } from '../../firebase';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';  // Import the PDF.js core library
-import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.entry';  // Import the PDF.js worker
-import mammoth from 'mammoth';  // For Word document handling
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';  
+import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.entry';  
+import mammoth from 'mammoth';  
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;  // Set up the worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export default function DashboardPage() {
     const { user } = useUser();
@@ -30,75 +30,69 @@ export default function DashboardPage() {
                 createdAt: new Date()
             });
             console.log("Resume and job description saved to Firebase with ID:", docRef.id);
-            return docRef;  // Return the document reference
+            return docRef;
         } catch (error) {
             console.error("Error saving resume and job description to Firebase:", error);
             throw error;
         }
     };
-    
-    // Function to handle file upload and extract text
+
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-    
+
         const fileType = file.type;
         if (fileType === "application/pdf") {
-            // Handle PDF
             const fileReader = new FileReader();
             fileReader.onload = async function() {
                 const pdfData = new Uint8Array(this.result);
                 const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
                 let text = '';
-                // Start the loop at 1 since PDF pages are 1-indexed
                 for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);  // Get page i (starts at 1)
+                    const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
                     const pageText = textContent.items.map(item => item.str).join(' ');
                     text += `${pageText}\n`;
                 }
-                setResumeText(text);  // Set the extracted text as the resume text
+                setResumeText(text);
             };
             fileReader.readAsArrayBuffer(file);
         } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-            // Handle Word DOCX
             const fileReader = new FileReader();
             fileReader.onload = async function() {
                 const arrayBuffer = this.result;
                 const result = await mammoth.extractRawText({ arrayBuffer });
-                setResumeText(result.value);  // Mammoth extracts the text from DOCX
+                setResumeText(result.value);
             };
             fileReader.readAsArrayBuffer(file);
         } else {
             alert("Please upload a PDF or Word document.");
         }
     };
-    
-    
+
     const generateTips = async () => {
         if (!resumeText || !jobDescription) {
             alert("Please enter a job description and paste your resume text.");
             return;
         }
-    
-        // Save both resume text and job description to Firebase and get the document reference
+
         const docRef = await saveResumeToFirebase(resumeText, jobDescription);
-    
+
         const formData = {
             jobDescription,
             resumeText,
-            documentId: docRef.id  // Pass the document ID to the API
+            documentId: docRef.id
         };
-    
+
         try {
             setLoading(true);
             const response = await axios.post('/api/generate', formData);
             setLoading(false);
-    
+
             const tips = response.data.tips;
             if (tips) {
-                const encodedTips = encodeURIComponent(JSON.stringify(tips));  // Encode the tips for the query parameter
-                router.push(`/resume_tips?tips=${encodedTips}`);  // Pass tips in the query string
+                const encodedTips = encodeURIComponent(JSON.stringify(tips));
+                router.push(`/resume_tips?tips=${encodedTips}`);
             } else {
                 alert("No tips were generated. Please try again.");
             }
@@ -107,11 +101,19 @@ export default function DashboardPage() {
             setLoading(false);
         }
     };
-    
+
     return (
         <Layout>
-            <Typography variant="h4" sx={{ color: 'white', fontFamily: "'Lato', sans-serif", mb: 4 }}>
-                Hi {user?.firstName}, Welcome to ProPathway!
+            <Typography 
+                variant="h4" 
+                sx={{ 
+                    color: 'white', 
+                    fontFamily: "'Playfair Display', serif",
+                    fontWeight: 'bold',
+                    mb: 4
+                }}
+            >
+                Hi {user?.firstName}, Welcome to <span style={{ color: '#EB5E28' }}>ProPathway!</span>
             </Typography>
             <Box
                 display="flex"
@@ -120,7 +122,6 @@ export default function DashboardPage() {
                 alignItems="center"
                 sx={{ width: '80%', maxWidth: '800px', mx: 'auto' }}
             >
-                {/* Job Description Section */}
                 <Box
                     sx={{
                         backgroundColor: '#1A202C',
@@ -149,7 +150,6 @@ export default function DashboardPage() {
                     />
                 </Box>
                 
-                {/* Resume File Upload Section */}
                 <Box
                     sx={{
                         backgroundColor: '#1A202C',
@@ -162,6 +162,7 @@ export default function DashboardPage() {
                         border: '2px solid #0055A4',
                     }}
                 >
+                    <UploadFile sx={{ fontSize: 40, mb: 2 }} />
                     <Typography variant="h6" sx={{ mb: 2 }}>
                         Upload your resume (PDF or Word):
                     </Typography>
@@ -172,7 +173,7 @@ export default function DashboardPage() {
                         style={{ marginBottom: '16px', color: 'white' }}
                     />
                     <Typography variant="body1" sx={{ mb: 2 }}>
-                        Or paste your resume text below:
+                    Paste your resume here, or feel free to edit out any personal information from your uploaded resume before generating tips.
                     </Typography>
                     <TextField
                         fullWidth
@@ -187,12 +188,11 @@ export default function DashboardPage() {
             </Box>
             <Button
                 variant="contained"
-                color="info"
-                sx={{ mt: 4 }}
+                sx={{ mt: 4, backgroundColor: '#EB5E28', color: '#FFFFFF', '&:hover': { backgroundColor: '#D14928' } }}
                 onClick={generateTips}
                 disabled={loading}
             >
-                {loading ? 'Generating Tips...' : 'Generate Resume Tips'}
+                {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Generate Resume Tips'}
             </Button>
         </Layout>
     );

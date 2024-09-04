@@ -23,12 +23,16 @@ export default async function handler(req, res) {
         const completion = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [
-                { role: 'system', content: `You are a resume expert. Provide specific resume improvement tips. Only a few short sentences.` },
+                { role: 'system', content: `You are a resume expert. Provide specific resume improvement tips. About 6-10 tips.` },
                 { role: 'user', content: `Job Description: ${jobDescription}\nResume Text: ${resumeText}\nProvide specific tips on how this resume can be improved to better match the job description.` }
             ],
         });
 
-        const tips = completion.choices[0].message.content.split('\n').filter(tip => tip.trim());
+        // Split the tips and clean up the text
+        let tips = completion.choices[0].message.content.split('\n').filter(tip => tip.trim());
+
+        // Remove any numbering and **bold** syntax
+        tips = tips.map(tip => tip.replace(/^\d+\.\s*/, '').replace(/\*\*/g, ''));
 
         // Logging the tips to the console for debugging
         console.log("Generated Tips:", tips);

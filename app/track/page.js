@@ -2,7 +2,6 @@
 import Layout from "../propathway_layout";
 import {
     Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Paper, styled, Box, Dialog, Typography, TextField, Button, Select, InputLabel, MenuItem, IconButton, FormControl
-
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
@@ -49,7 +48,7 @@ export default function TrackApplications() {
                 const q = query(collection(db, 'jobApplications'), where("userId", "==", user?.id));
                 const querySnapshot = await getDocs(q);
                 const jobs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setJobApplications(jobs);
+                setJobApplications(jobs); 
             } catch (error) {
                 console.error("Error fetching documents: ", error);
             }
@@ -60,12 +59,10 @@ export default function TrackApplications() {
         }
     }, [user]);
 
-    // Function to open the dialog
     const handleOpenDialog = () => {
         setIsOpen(true);
     };
 
-    // Function to close the dialog
     const handleCloseDialog = () => {
         setIsOpen(false);
         setJobTitle("");
@@ -76,8 +73,12 @@ export default function TrackApplications() {
         setStatus("");
     };
 
-    // Function to add a new job application to the table
     const handleAddJob = async () => {
+        if (!jobTitle || !company || !stage || !status) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
         const newJobApp = {
             jobTitle,
             company,
@@ -85,22 +86,22 @@ export default function TrackApplications() {
             pay,
             stage,
             status,
+            userId: user.id, 
         };
+
         try {
-            await addDoc(collection(db, "jobApplications"), newJobApp);
-            setJobApplications([...jobApplications, newJobApp]);
+            const docRef = await addDoc(collection(db, "jobApplications"), newJobApp);
+            setJobApplications([...jobApplications, { ...newJobApp, id: docRef.id }]);
             handleCloseDialog();
         } catch (error) {
             console.error("Error adding document: ", error);
         }
     };
 
-    // Function to handle editing a specific cell
     const handleEdit = (index) => {
         setEditRowIndex(index);
     };
 
-    // Function to handle updating the table data after editing
     const handleUpdate = async (index, field, value) => {
         const updatedJobApplications = [...jobApplications];
         updatedJobApplications[index] = {
@@ -111,17 +112,15 @@ export default function TrackApplications() {
 
         try {
             const jobDocRef = doc(db, "jobApplications", updatedJobApplications[index].id);
-            await updateDoc(jobDocRef, { [field]: value });
+            await updateDoc(jobDocRef, { [field]: value }); 
         } catch (error) {
             console.error("Error updating document: ", error);
         }
     };
 
-    // Function to stop editing
     const handleSave = () => {
         setEditRowIndex(null);
     };
-
 
     return (
         <Layout>
@@ -135,7 +134,6 @@ export default function TrackApplications() {
                     Add Job
                 </Button>
 
-                {/* Job Applications Table */}
                 <TableContainer component={Paper}>
                     <Table sx={{ minWidth: 700 }} aria-label="customized table">
                         <TableHead>
@@ -269,7 +267,6 @@ export default function TrackApplications() {
                     </Table>
                 </TableContainer>
 
-                {/* Add Job Dialog */}
                 <Dialog open={isOpen} onClose={handleCloseDialog}>
                     <Box p={3}>
                         <Typography variant="h6" gutterBottom>

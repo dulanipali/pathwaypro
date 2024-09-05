@@ -22,7 +22,7 @@ import {
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 import { db } from '../../firebase'; // Ensure Firebase is initialized correctly
-import { collection, addDoc, getDocs } from 'firebase/firestore'; // Firestore methods
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'; // Firestore methods
 import Layout from "../propathway_layout";
 
 const tokens = {
@@ -67,10 +67,21 @@ const Calendar = () => {
     setIsOpen(true);
   };
 
-  const handleDeleteEvent = () => {
-    setCurrentEvents(currentEvents.filter((event) => event.id !== deletingEventId));
-    setIsOpen(false); 
-    setDeletingEventId(null); 
+  const handleDeleteEvent = async () => {
+    if (!deletingEventId) return;
+
+    try {
+      // Delete the event from Firestore
+      await deleteDoc(doc(db, 'events', deletingEventId));
+
+      // Update the local state to remove the event
+      setCurrentEvents(currentEvents.filter((event) => event.id !== deletingEventId));
+
+      setIsOpen(false); 
+      setDeletingEventId(null);
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+    }
   };
 
   const handleAddEvent = async () => {
@@ -198,6 +209,15 @@ const Calendar = () => {
             eventDidMount={(info) => {
               info.el.style.backgroundColor = tokens.orange;
               info.el.style.color = '#FFFFFF'; 
+            }}
+            // Style the title to display in black
+            customButtons={{
+              title: {
+                text: "Title",
+                click: function () {
+                  console.log("Custom Title");
+                }
+              }
             }}
             dayHeaderContent={({ date }) => (
               <Typography sx={{ color: tokens.textPrimary }}>

@@ -12,6 +12,7 @@ export default function Home() {
     const { isSignedIn } = useAuth();
     const router = useRouter();
 
+    // Redirect based on the user's signed-in status
     const handleGetStarted = () => {
         if (isSignedIn) {
             router.push('/dashboard');
@@ -20,6 +21,7 @@ export default function Home() {
         }
     };
 
+    // Handle Stripe Premium Plan Checkout
     const handlePremium = async () => {
         const stripe = await stripePromise;
 

@@ -21,6 +21,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
+    // Save resume and job description to Firebase
     const saveResumeToFirebase = async (resumeText, jobDescription) => {
         try {
             const docRef = await addDoc(collection(db, 'resumes'), {
@@ -37,6 +38,7 @@ export default function DashboardPage() {
         }
     };
 
+    // Handle file upload for PDF/Word document
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -70,6 +72,7 @@ export default function DashboardPage() {
         }
     };
 
+    // Generate tips based on job description and resume text
     const generateTips = async () => {
         if (!resumeText || !jobDescription) {
             alert("Please enter a job description and paste your resume text.");

@@ -13,10 +13,9 @@ export default function ApplicationInsights() {
     const [resumes, setResumes] = useState([]);
     const [selectedResume, setSelectedResume] = useState(null);
     const [open, setOpen] = useState(false);
-    const [editingNameIndex, setEditingNameIndex] = useState(null); // Track the index of the editing insight
-    const [insightNames, setInsightNames] = useState([]); // Add state to store insight names
+    const [editingNameIndex, setEditingNameIndex] = useState(null);
+    const [insightNames, setInsightNames] = useState([]);
 
-    // Retrieve saved insight names from localStorage when the component mounts
     useEffect(() => {
         const savedInsightNames = JSON.parse(localStorage.getItem('insightNames')) || [];
         const fetchResumes = async () => {
@@ -26,10 +25,10 @@ export default function ApplicationInsights() {
                 const resumesList = querySnapshot.docs.map((doc, index) => ({
                     id: doc.id,
                     ...doc.data(),
-                    name: savedInsightNames[index] || `Insight #${index + 1}`, // Use localStorage name or default
+                    name: savedInsightNames[index] || `Insight #${index + 1}`,
                 }));
                 setResumes(resumesList);
-                setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`)); // Initialize with localStorage or default names
+                setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`));
             } catch (error) {
                 console.error("Error fetching resumes:", error);
             }
@@ -40,7 +39,6 @@ export default function ApplicationInsights() {
         }
     }, [user]);
 
-    // Save updated insight names to localStorage
     const saveInsightNamesToLocalStorage = (updatedNames) => {
         localStorage.setItem('insightNames', JSON.stringify(updatedNames));
     };
@@ -49,14 +47,14 @@ export default function ApplicationInsights() {
         const updatedNames = [...insightNames];
         updatedNames[index] = newName;
         setInsightNames(updatedNames);
-        saveInsightNamesToLocalStorage(updatedNames); // Save the updated names to localStorage
+        saveInsightNamesToLocalStorage(updatedNames);
     };
 
     const toggleEditing = (index) => {
         if (editingNameIndex === index) {
-            setEditingNameIndex(null); // Stop editing
+            setEditingNameIndex(null);
         } else {
-            setEditingNameIndex(index); // Start editing
+            setEditingNameIndex(index);
         }
     };
 
@@ -79,31 +77,33 @@ export default function ApplicationInsights() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     padding: '0',
-                    marginTop: '-20px', // Move the title higher
+                    marginTop: '-20px',
+                    backgroundColor: '#0A1128', // Dark background for the page
+                    minHeight: '100vh',
                 }}
             >
-                {/* New Title Section */}
+                {/* Title Section */}
                 <Typography
                     variant="h3"
                     sx={{
-                        color: '#EB5E28', // Orange
+                        color: '#EB5E28', // Orange accent
                         fontFamily: "'Poppins', sans-serif",
-                        marginTop: '0px',  // Positioned at the top
-                        paddingTop: '20px', // No padding above
+                        marginTop: '0px',
+                        paddingTop: '20px',
                         textAlign: 'center',
                     }}
                 >
                     Welcome to Application Insights
                 </Typography>
 
-                {/* Existing Title with more space between */}
+                {/* Subtitle Section */}
                 <Typography
                     variant="h4"
                     sx={{
-                        color: '#EB5E28',
+                        color: '#EB5E28', // Orange accent
                         fontFamily: "'Poppins', sans-serif",
-                        marginTop: '40px',  // More space between the titles
-                        marginBottom: '40px', // Space below the title
+                        marginTop: '40px',
+                        marginBottom: '40px',
                         textAlign: 'center',
                     }}
                 >
@@ -126,70 +126,78 @@ export default function ApplicationInsights() {
                         resumes.map((resume, index) => (
                             <Paper
                                 key={resume.id}
-                                elevation={4}
+                                elevation={6} // Increased elevation for more depth
                                 sx={{
                                     width: '100%',
                                     mb: 4,
                                     p: 3,
-                                    backgroundColor: '#1A202C',
-                                    borderRadius: '10px',
-                                    color: 'white',
-                                    boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.2)',
-                                    border: '2px solid #EB5E28',
+                                    backgroundColor: '#FFFFFF', // White background for each insight card
+                                    borderRadius: '10px', // Rounded corners
+                                    color: '#333333', // Dark gray text
+                                    boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', // Soft shadow for depth
+                                    border: '4px solid #EB5E28', // Thicker orange border
                                     textAlign: 'center',
                                     fontFamily: "'Poppins', sans-serif",
                                 }}
                             >
-                                {/* Editable Insight Name */}
                                 {editingNameIndex === index ? (
                                     <TextField
                                         variant="outlined"
                                         value={insightNames[index]}
                                         onChange={(e) => handleNameChange(index, e.target.value)}
                                         InputLabelProps={{
-                                            shrink: true, 
+                                            shrink: true,
                                         }}
                                         sx={{
                                             marginBottom: 2,
-                                            backgroundColor: 'white',
+                                            backgroundColor: '#FFFFFF',
                                             borderRadius: '5px',
                                             width: '100%',
                                             input: {
-                                                padding: '12px', // Add padding inside the input
+                                                padding: '12px',
                                             },
                                             '& .MuiOutlinedInput-root': {
                                                 '& fieldset': {
-                                                    borderColor: '#EB5E28', // Set border color to match the theme
+                                                    borderColor: '#EB5E28', // Orange border
                                                 },
                                                 '&:hover fieldset': {
-                                                    borderColor: '#FF6F42', // Border color on hover
+                                                    borderColor: '#FF6F42', // Slightly brighter orange on hover
                                                 },
                                                 '&.Mui-focused fieldset': {
-                                                    borderColor: '#FF6F42', // Border color when focused
+                                                    borderColor: '#FF6F42', // Brighter orange when focused
                                                 },
                                             },
                                             '& label': {
-                                                color: '#FF6F42', // Label color
+                                                color: '#666', // Softer label color
                                             },
                                         }}
                                     />
                                 ) : (
-                                    <Typography variant="h6" sx={{ color: '#FF6F42', mb: 2 }}>
+                                    <Typography variant="h6" sx={{ color: '#333333', mb: 2, fontWeight: 'bold' }}>
                                         {insightNames[index]}
                                     </Typography>
                                 )}
 
                                 <Button
-                                    variant="outlined"
-                                    sx={{ color: '#EB5E28', borderColor: '#EB5E28', mr: 2 }}
+                                    variant="contained" // Solid button
+                                    sx={{
+                                        backgroundColor: '#EB5E28', // Orange button by default
+                                        color: '#FFFFFF',
+                                        mr: 2,
+                                        '&:hover': { backgroundColor: '#D9534F' }, // Darker orange on hover
+                                    }}
                                     onClick={() => handleOpen({ ...resume, name: insightNames[index] })}
                                 >
                                     View {insightNames[index]}
                                 </Button>
 
                                 <Button
-                                    variant="outlined"
-                                    sx={{ color: '#FF6F42', borderColor: '#FF6F42' }}
+                                    variant="contained" // Solid button
+                                    sx={{
+                                        backgroundColor: '#EB5E28', // Orange button by default
+                                        color: '#FFFFFF',
+                                        '&:hover': { backgroundColor: '#D9534F' }, // Darker orange on hover
+                                    }}
                                     onClick={() => toggleEditing(index)}
                                 >
                                     {editingNameIndex === index ? 'Save' : 'Edit Name'}
@@ -219,51 +227,79 @@ export default function ApplicationInsights() {
                                     width: '90%',
                                     maxWidth: '600px',
                                     height: '80%',
-                                    bgcolor: '#1A202C',
-                                    boxShadow: 24,
+                                    bgcolor: '#0A1128', // Same background color as page
+                                    boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.15)', // Soft shadow for modal
                                     p: 4,
-                                    borderRadius: '10px',
-                                    color: 'white',
-                                    border: '2px solid #EB5E28',
+                                    borderRadius: '10px', // Rounded corners for modal
+                                    color: '#FFFFFF', // White text for modal
+                                    border: '4px solid #EB5E28', // Thicker orange border for modal
                                     overflowY: 'auto',
-                                    fontFamily: "'Poppins', sans-serif" // Apply Poppins to entire modal content
+                                    fontFamily: "'Poppins', sans-serif",
                                 }}
                             >
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                    <Typography id="insight-modal-title" variant="h5" sx={{ color: '#FF6F42', fontFamily: "'Poppins', sans-serif" }}>
+                                    <Typography id="insight-modal-title" variant="h5" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
                                         {selectedResume.name} Details
                                     </Typography>
-                                    <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+                                    <IconButton onClick={handleClose} sx={{ color: '#FFFFFF' }}>
                                         <CloseIcon />
                                     </IconButton>
                                 </Box>
 
+                                {/* Job Description Section */}
                                 <Box sx={{ mb: 3 }}>
-                                    <Typography variant="h6" sx={{ color: '#FF6F42' }}>
+                                    <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
                                         Job Description:
                                     </Typography>
-                                    <Typography variant="body1" sx={{ backgroundColor: '#f4f4f4', color: 'black', p: 2, borderRadius: '5px' }}>
+                                    <Typography 
+                                        variant="body1" 
+                                        sx={{ 
+                                            backgroundColor: '#FFFFFF', // White background for this section
+                                            color: '#333', 
+                                            p: 2, 
+                                            borderRadius: '5px', // Rounded corners for the section
+                                            border: '1px solid #ddd', // Subtle border for definition
+                                        }}
+                                    >
                                         {selectedResume.jobDescription}
                                     </Typography>
                                 </Box>
 
+                                {/* Resume Section */}
                                 <Box sx={{ mb: 3 }}>
-                                    <Typography variant="h6" sx={{ color: '#FF6F42' }}>
+                                    <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
                                         Resume:
                                     </Typography>
-                                    <Typography variant="body1" sx={{ backgroundColor: '#f4f4f4', color: 'black', p: 2, borderRadius: '5px' }}>
+                                    <Typography 
+                                        variant="body1" 
+                                        sx={{ 
+                                            backgroundColor: '#FFFFFF', // White background for this section
+                                            color: '#333', 
+                                            p: 2, 
+                                            borderRadius: '5px', // Rounded corners for the section
+                                            border: '1px solid #ddd', // Subtle border for definition
+                                        }}
+                                    >
                                         {selectedResume.resumeText}
                                     </Typography>
                                 </Box>
 
+                                {/* Resume Tips Section */}
                                 {selectedResume.tips && selectedResume.tips.length > 0 && (
-                                    <Box>
-                                        <Typography variant="h6" sx={{ color: '#FF6F42' }}>
+                                    <Box sx={{ mb: 3 }}>
+                                        <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
                                             Resume Tips:
                                         </Typography>
-                                        <Box sx={{ backgroundColor: 'white', p: 2, borderRadius: '5px', mt: 1 }}>
+                                        <Box 
+                                            sx={{ 
+                                                backgroundColor: '#FFFFFF', // White background for this section
+                                                p: 2, 
+                                                borderRadius: '5px', // Rounded corners for the section
+                                                border: '1px solid #ddd', // Subtle border for definition
+                                            }}
+                                        >
                                             {selectedResume.tips.map((tip, index) => (
-                                                <Typography key={index} variant="body2" sx={{ color: 'black', mb: 1 }}>
+                                                <Typography key={index} variant="body2" sx={{ color: '#333333', mb: 1 }}>
                                                     {tip}
                                                 </Typography>
                                             ))}
@@ -271,8 +307,12 @@ export default function ApplicationInsights() {
                                     </Box>
                                 )}
 
+                                {/* Date Saved Section */}
                                 {selectedResume.createdAt && (
-                                    <Typography variant="caption" sx={{ color: '#FF6F42', display: 'block', mt: 2 }}>
+                                    <Typography 
+                                        variant="caption" 
+                                        sx={{ color: '#FFFFFF', display: 'block', mt: 2 }}
+                                    >
                                         Saved on: {new Date(selectedResume.createdAt.seconds * 1000).toLocaleString()}
                                     </Typography>
                                 )}

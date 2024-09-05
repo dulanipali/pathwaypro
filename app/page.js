@@ -2,20 +2,46 @@
 import { AppBar, Container, Toolbar, Typography, Button, Box, CssBaseline } from "@mui/material";
 import Link from 'next/link';
 import Head from 'next/head';
-import { useAuth } from '@clerk/nextjs'; // Import Clerk's useAuth hook
-import { useRouter } from 'next/navigation'; // Import useRouter to programmatically navigate
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function Home() {
-    const { isSignedIn } = useAuth(); // Check if the user is signed in
-    const router = useRouter(); // Use router for programmatic navigation
+    const { isSignedIn } = useAuth();
+    const router = useRouter();
 
     const handleGetStarted = () => {
         if (isSignedIn) {
-            router.push('/dashboard'); // If user is signed in, navigate to assistant page
+            router.push('/dashboard');
         } else {
-            router.push('/sign-in'); // If user is not signed in, navigate to sign-in page
+            router.push('/sign-in');
         }
-    }
+    };
+
+    const handlePremium = async () => {
+        const stripe = await stripePromise;
+
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                plan: 'pro',
+            }),
+        });
+
+        const session = await response.json();
+
+        if (session.id) {
+            const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
+            if (error) {
+                console.error('Stripe Checkout Error:', error);
+            }
+        }
+    };
 
     return (
         <Container
@@ -42,7 +68,7 @@ export default function Home() {
             <AppBar
                 position="static"
                 sx={{
-                    backgroundColor: '#0A1128', // Changed to dark blue
+                    backgroundColor: '#0A1128',
                     boxShadow: 'none',
                     minWidth: '100vw',
                 }}
@@ -55,7 +81,7 @@ export default function Home() {
                         <Button sx={{
                             mx: 1,
                             color: 'white',
-                            '&:hover': { backgroundColor: '#0055A4' }, // Changed hover color to a blue shade
+                            '&:hover': { backgroundColor: '#0055A4' },
                             transition: 'background-color 0.3s ease',
                             borderRadius: '20px',
                         }}>Login</Button>
@@ -65,7 +91,7 @@ export default function Home() {
                             sx={{
                                 mx: 1,
                                 color: 'white',
-                                '&:hover': { backgroundColor: '#0055A4' }, // Changed hover color to a blue shade
+                                '&:hover': { backgroundColor: '#0055A4' },
                                 transition: 'background-color 0.3s ease',
                                 borderRadius: '20px',
                                 fontFamily: "'Lato', sans-serif",
@@ -86,15 +112,14 @@ export default function Home() {
                     textAlign: 'center',
                     overflowX: 'hidden',
                     width: '100vw',
-                    height: '100vh',
+                    height: '80vh',
                     padding: 0,
                     margin: 0,
                 }}
             >
                 <Box sx={{
-                    backgroundColor: '#0A1128', // Changed to dark blue
+                    backgroundColor: '#0A1128',
                     width: '100vw',
-                    height: '100vh',
                     py: 8,
                     px: 4,
                     margin: 0,
@@ -106,7 +131,7 @@ export default function Home() {
                             fontWeight: 'bold',
                             animation: `fadeIn 2s ease`,
                             fontFamily: "'Lato', sans-serif",
-                            color: 'white', // Changed text color to white for visibility
+                            color: 'white',
                         }}
                     >
                         ProPathway
@@ -116,21 +141,21 @@ export default function Home() {
                         sx={{
                             mb: 4,
                             fontFamily: "'Lato', sans-serif",
-                            color: 'white', // Changed text color to white for visibility
+                            color: 'white',
                         }}
                     >
-                     
                     </Typography>
                     <Button
                         variant="contained"
                         sx={{
-                            backgroundColor: '#FF6F42', // Keeping this color for contrast
-                            '&:hover': { backgroundColor: '#EB5E28' }, // Darker shade for hover
+                            backgroundColor: '#FF6F42',
+                            '&:hover': { backgroundColor: '#EB5E28' },
                             fontSize: '1.2rem',
                             px: 4,
                             py: 1,
                             borderRadius: '20px',
                             fontFamily: "'Lato', sans-serif",
+                            mb: 2,
                         }}
                         onClick={handleGetStarted}
                     >
@@ -138,17 +163,36 @@ export default function Home() {
                     </Button>
                 </Box>
             </Box>
+
             <Box
                 sx={{
-                    backgroundColor: '#0A1128', // Changed to dark blue
+                    backgroundColor: '#0A1128',
                     color: '#fff',
-                    py: 2,
+                    py: 4,
                     textAlign: 'center',
                     minWidth: '100vw',
                     margin: 0,
                 }}
             >
-                <Typography variant="body2">
+                <Button
+                    variant="outlined"
+                    sx={{
+                        color: '#FF6F42',
+                        borderColor: '#FF6F42',
+                        '&:hover': { backgroundColor: '#EB5E28', color: 'white' },
+                        fontSize: '1.2rem',
+                        px: 4,
+                        py: 1,
+                        borderRadius: '20px',
+                        fontFamily: "'Lato', sans-serif",
+                        mb: 2,
+                    }}
+                    onClick={handlePremium}
+                >
+                    Get Started with Premium
+                </Button>
+
+                <Typography variant="body2" sx={{ mt: 2 }}>
                     © 2024 ProPathway. All rights reserved.
                 </Typography>
             </Box>

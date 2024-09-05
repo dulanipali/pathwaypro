@@ -12,13 +12,19 @@ export default function ResumeTipsPage() {
     useEffect(() => {
         const tipsParam = searchParams.get('tips');
         if (tipsParam) {
-            const decodedTips = JSON.parse(decodeURIComponent(tipsParam));
-            console.log("Parsed Tips:", decodedTips);
-            setTips(decodedTips);
+            try {
+                const decodedTips = JSON.parse(decodeURIComponent(tipsParam));
+                console.log("Parsed Tips:", decodedTips);
+                setTips(decodedTips);
+            } catch (error) {
+                console.error("Error decoding tips parameter:", error);
+                setTips([]); // Set default empty tips in case of error
+            }
         } else {
             console.log("No tips found in query");
         }
     }, [searchParams]);
+    
 
     const handleInterviewPrep = () => {
         router.push('/interview_prep');
@@ -33,10 +39,20 @@ export default function ResumeTipsPage() {
                         backgroundColor: '#0A1128',
                         p: 3,
                         borderRadius: '10px',
-                        border: '2px solid #FF6F42',  // Border color to match your design
+                        border: '2px solid #FF6F42',  
                     }}
                 >
-                    <Typography variant="h5" sx={{ color: '#FF6F42', mb: 2, textAlign: 'center' }}>Tips</Typography>
+                    <Typography 
+                        variant="h5" 
+                        sx={{ 
+                            color: '#FF6F42', 
+                            mb: 2, 
+                            textAlign: 'center',
+                            fontFamily: "'Playfair Display', serif"  
+                        }}
+                    >
+                        Tips
+                    </Typography>
                     {tips && tips.length > 0 ? (
                         <Box component="ul" sx={{ pl: 2, color: 'white' }}>
                             {tips.map((tip, index) => (
@@ -45,8 +61,11 @@ export default function ResumeTipsPage() {
                                     component="li"
                                     variant="body1"
                                     sx={{
-                                        color: 'white',
+                                        color: '#FF6F42',  // Orange bullet points
                                         mb: 1,
+                                        listStyleType: '"⟡ "',  
+                                        fontFamily: "'Roboto', sans-serif",  // Updated font for tips
+                                        color: 'white',  // White text for the actual tips
                                     }}
                                 >
                                     {tip}

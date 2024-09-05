@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -21,9 +21,9 @@ import {
 } from "@mui/material";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-
+import { db } from '../../firebase'; // Ensure Firebase is initialized correctly
+import { collection, addDoc, getDocs } from 'firebase/firestore'; // Firestore methods
 import Layout from "../propathway_layout";
-
 
 const tokens = {
   orange: '#EB5E28',
@@ -39,6 +39,22 @@ const Calendar = () => {
   const [newEventTitle, setNewEventTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [deletingEventId, setDeletingEventId] = useState(null); 
+
+  // Fetch events from Firestore when the component mounts
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const querySnapshot = await getDocs(collection(db, 'events'));
+      const eventsFromFirestore = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        title: doc.data().title,
+        start: doc.data().start.toDate(), // Convert Firestore timestamp to JS Date object
+        allDay: doc.data().allDay,
+      }));
+      setCurrentEvents(eventsFromFirestore);
+    };
+
+    fetchEvents();
+  }, []); // Empty dependency array to run the effect once when the component mounts
 
   const handleDateClick = (selected) => {
     setSelectedDate(selected.date);
@@ -57,18 +73,26 @@ const Calendar = () => {
     setDeletingEventId(null); 
   };
 
-  const handleAddEvent = () => {
+  const handleAddEvent = async () => {
     if (!selectedDate || !newEventTitle) return;
 
     const newEvent = {
-      id: `${new Date().toISOString()}-${newEventTitle}`,
       title: newEventTitle,
       start: selectedDate,
       allDay: true, 
     };
 
-    setCurrentEvents([...currentEvents, newEvent]);
-    setIsOpen(false);
+    // Add the new event to Firestore
+    try {
+      const docRef = await addDoc(collection(db, 'events'), newEvent);
+      console.log("Document written with ID: ", docRef.id);
+
+      // Update the state after saving to Firestore
+      setCurrentEvents([...currentEvents, { ...newEvent, id: docRef.id }]);
+      setIsOpen(false);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
 
   const openHelpDialog = () => {
@@ -243,9 +267,6 @@ const Calendar = () => {
             </Typography>
             <Typography variant="body2" gutterBottom>
               <strong>3. Deleting an Event:</strong> To delete an event, click on the event in the sidebar, and then click the "Delete" button in the dialog that appears.
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>4. Navigating the Calendar:</strong> Use the navigation buttons at the top of the calendar to switch between months, weeks, or days.
             </Typography>
             <Typography variant="body2">
               If you need more help, feel free to reach out to the support team!

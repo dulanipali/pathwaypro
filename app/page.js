@@ -23,7 +23,7 @@ export default function Home() {
     const handlePremium = async () => {
         const stripe = await stripePromise;
 
-        const response = await fetch('/api/checkout', {
+        const response = await fetch('/api/checkout_sessions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

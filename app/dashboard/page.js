@@ -23,23 +23,30 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    // Save resume and job description to Firebase
-    const saveResumeToFirebase = async (resumeText, jobDescription, fileUrl) => {
-        try {
-            const docRef = await addDoc(collection(db, 'resumes'), {
-                userId: user?.id,
-                resumeText,
-                jobDescription,
-                fileUrl,  // Save the file URL in Firestore
-                createdAt: new Date()
-            });
-            console.log("Resume and job description saved to Firebase with ID:", docRef.id);
-            return docRef;
-        } catch (error) {
-            console.error("Error saving resume and job description to Firebase:", error);
-            throw error;
-        }
-    };
+    // Save resume URL, job description, and generated tips to Firebase
+const saveResumeToFirebase = async (jobDescription, fileUrl, tips) => {
+    try {
+        const docRef = await addDoc(collection(db, 'resumes'), {
+            userId: user?.id,
+            jobDescription,
+            fileUrl,  // Save the file URL in Firestore
+            tips,  // Save generated tips in Firestore
+            createdAt: new Date()
+        });
+        console.log("Resume and job description saved to Firebase with ID:", docRef.id);
+        return docRef;
+    } catch (error) {
+        console.error("Error saving resume and job description to Firebase:", error);
+        throw error;
+    }
+};
+
+
+
+
+
+
+
 
     // Handle file upload for PDF/Word document and upload to Firebase Storage
     const handleFileUpload = async (e) => {
@@ -88,41 +95,46 @@ export default function DashboardPage() {
     };
 
     // Generate tips based on job description and resume text
-    const generateTips = async () => {
-        if (!resumeText || !jobDescription) {
-            alert("Please enter a job description and paste your resume text.");
-            return;
-        }
+   // Generate tips based on job description and resume text
+// Generate tips based on job description and resume text
+const generateTips = async () => {
+    if (!resumeText || !jobDescription) {
+        alert("Please enter a job description and upload your resume.");
+        return;
+    }
 
-        // Save resume text, job description, and file URL to Firestore
-        const docRef = await saveResumeToFirebase(resumeText, jobDescription, fileUrl);
+    try {
+        setLoading(true);
 
         const formData = {
             jobDescription,
-            resumeText,  // Send extracted text to API
-            documentId: docRef.id
+            resumeText
         };
 
-        try {
-            setLoading(true);
-            const response = await axios.post('/api/generate', formData);
-            setLoading(false);
+        // First, save the resume and job description to Firebase and get the document ID
+        const docRef = await saveResumeToFirebase(jobDescription, fileUrl, []);
+        
+        // Then, pass the document ID along with job description and resume text to the API
+        const response = await axios.post('/api/generate', {
+            jobDescription,
+            resumeText,
+            documentId: docRef.id  // Pass document ID to the API
+        });
+        
+        const tips = response.data.tips;
+        
+        // Update Firestore document with generated tips
+        await updateDoc(docRef, { tips });
 
-            const tips = response.data.tips;
-            if (tips) {
-                // Save tips to Firestore in the same document
-                await updateDoc(doc(db, 'resumes', docRef.id), { tips });
+        // Redirect to ResumeTipsPage with the document ID
+        router.push(`/resume_tips?id=${docRef.id}`);
+        setLoading(false);
+    } catch (error) {
+        console.error('Failed to generate tips:', error);
+        setLoading(false);
+    }
+};
 
-                // Redirect to ResumeTipsPage with the document ID
-                router.push(`/resume_tips?id=${docRef.id}`);
-            } else {
-                alert("No tips were generated. Please try again.");
-            }
-        } catch (error) {
-            console.error('Failed to generate tips:', error);
-            setLoading(false);
-        }
-    };
 
     return (
         <Layout>

@@ -62,10 +62,11 @@ export default function ResumeTipsPage() {
     return (
         <Layout>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4, mt: 4 }}>
+                
                 {/* File Embed Preview (Left) */}
                 <Box
                     sx={{
-                        width: '45%',  // Adjust as needed
+                        width: '40%',  // Adjust as needed
                         backgroundColor: '#0A1128',
                         p: 3,
                         borderRadius: '10px',
@@ -91,21 +92,19 @@ export default function ResumeTipsPage() {
                     ) : fileUrl ? (
                         <Box>
                             {isPdf ? (
-                                // Embed the PDF directly with zoom level
                                 <iframe 
-                                    src={`${fileUrl}#zoom=50`}  // Set zoom level to 133%
+                                    src={`${fileUrl}#zoom=50`}  
                                     width="100%" 
                                     height="600px"  
                                     style={{ border: 'none', borderRadius: '8px' }}
                                     title="Resume Preview"
                                 />
                             ) : (
-                                // Use Google Docs Viewer for Word documents
                                 <iframe 
                                     src={`https://docs.google.com/viewer?url=${fileUrl}&embedded=true`} 
                                     width="100%" 
                                     height="600px"  
-                                    style={{ border: 'none', borderRadius: '8px', transform: 'scale(1.33)', transformOrigin: '0 0' }}  // CSS Zoom for Google Docs Viewer
+                                    style={{ border: 'none', borderRadius: '8px' }}  
                                     title="Resume Preview"
                                 />
                             )}
@@ -125,7 +124,7 @@ export default function ResumeTipsPage() {
                 {/* Tips Card (Right) */}
                 <Box
                     sx={{
-                        width: '45%',  // Adjust as needed
+                        width: '40%',  
                         backgroundColor: '#0A1128',
                         p: 3,
                         borderRadius: '10px',
@@ -155,9 +154,9 @@ export default function ResumeTipsPage() {
                                     component="li"
                                     variant="body1"
                                     sx={{
-                                        listStyleType: '"⟡ "',  // Define bullet point
+                                        listStyleType: '"⟡ "',  
                                         fontFamily: "'Roboto', sans-serif",  
-                                        color: 'white',  // White text for the actual tips
+                                        color: 'white',  
                                         mb: 1
                                     }}
                                 >

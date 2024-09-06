@@ -2,22 +2,22 @@
 import { AppBar, Container, Toolbar, Typography, Button, Box, CssBaseline } from "@mui/material";
 import Link from 'next/link';
 import Head from 'next/head';
-import { useAuth } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs'; // Changed from useAuth to useUser
 import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function Home() {
-    const { isSignedIn } = useAuth();
+    const { user, isSignedIn } = useUser(); // Updated to useUser
     const router = useRouter();
 
     // Redirect based on the user's signed-in status
     const handleGetStarted = () => {
         if (isSignedIn) {
-            router.push('/dashboard');
+            router.push('/dashboard'); // Redirect to dashboard if signed in
         } else {
-            router.push('/sign-in');
+            router.push('/sign-in'); // Otherwise, redirect to sign-in
         }
     };
 

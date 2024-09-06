@@ -155,7 +155,7 @@ export default function ApplicationInsights() {
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
                             width: '80%',
-                            bgcolor: '#FFFFFF',
+                            bgcolor: '#FFFFFF', // White background
                             boxShadow: 24,
                             p: 4,
                             borderRadius: '8px',
@@ -164,10 +164,10 @@ export default function ApplicationInsights() {
                         <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#EB5E28', mb: 2 }}>
                             How to Use Application Insights
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#000000' }}> {/* Changed to black */}
-                            This page displays all your uploaded resumes, job descriptions and tips with the following features:
+                        <Typography variant="body1" sx={{ color: '#000000' }}> {/* Ensuring the text is black */}
+                            This page displays all your uploaded resumes, job descriptions, and tips with the following features:
                         </Typography>
-                        <ul>
+                        <ul style={{ color: '#000000' }}> {/* Ensuring the list text is black */}
                             <li><strong>View</strong>: Click the "View" button to see the details of the resume, including tips and the uploaded file.</li>
                             <li><strong>Edit</strong>: Click the "Edit" button to rename your resume insight or delete it.</li>
                         </ul>
@@ -264,18 +264,20 @@ export default function ApplicationInsights() {
 
                             {/* Job Description Section */}
                             <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
+                                <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold', mb: 1 }}>
                                     Job Description:
                                 </Typography>
                                 <Typography 
                                     variant="body1" 
                                     sx={{ 
-                                        backgroundColor: '#FFFFFF', 
+                                        backgroundColor: '#F7F7F7', 
                                         color: '#333', 
                                         p: 2, 
-                                        borderRadius: '5px', 
+                                        borderRadius: '8px', 
                                         border: '1px solid #ddd',
-                                        whiteSpace: 'pre-line'
+                                        whiteSpace: 'pre-line',
+                                        lineHeight: '1.6',
+                                        fontFamily: "'Poppins', sans-serif",
                                     }}
                                 >
                                     {selectedResume.jobDescription}

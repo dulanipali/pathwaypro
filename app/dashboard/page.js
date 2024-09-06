@@ -6,8 +6,9 @@ import { ContentCopy, UploadFile } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../propathway_layout';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc } from "firebase/firestore";
-import { db } from '../../firebase';
+import { collection, doc, updateDoc, addDoc } from "firebase/firestore";
+import { db, storage } from '../../firebase';  // Import Firebase Storage
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";  // Import Firebase Storage methods
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';  
 import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.entry';  
 import mammoth from 'mammoth';  
@@ -18,16 +19,18 @@ export default function DashboardPage() {
     const { user } = useUser();
     const [jobDescription, setJobDescription] = useState('');
     const [resumeText, setResumeText] = useState('');
+    const [fileUrl, setFileUrl] = useState('');  // State to hold the file URL
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     // Save resume and job description to Firebase
-    const saveResumeToFirebase = async (resumeText, jobDescription) => {
+    const saveResumeToFirebase = async (resumeText, jobDescription, fileUrl) => {
         try {
             const docRef = await addDoc(collection(db, 'resumes'), {
                 userId: user?.id,
                 resumeText,
                 jobDescription,
+                fileUrl,  // Save the file URL in Firestore
                 createdAt: new Date()
             });
             console.log("Resume and job description saved to Firebase with ID:", docRef.id);
@@ -38,37 +41,49 @@ export default function DashboardPage() {
         }
     };
 
-    // Handle file upload for PDF/Word document
+    // Handle file upload for PDF/Word document and upload to Firebase Storage
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         const fileType = file.type;
-        if (fileType === "application/pdf") {
-            const fileReader = new FileReader();
-            fileReader.onload = async function() {
-                const pdfData = new Uint8Array(this.result);
-                const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
-                let text = '';
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    text += `${pageText}\n`;
-                }
-                setResumeText(text);
-            };
-            fileReader.readAsArrayBuffer(file);
-        } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-            const fileReader = new FileReader();
-            fileReader.onload = async function() {
-                const arrayBuffer = this.result;
-                const result = await mammoth.extractRawText({ arrayBuffer });
-                setResumeText(result.value);
-            };
-            fileReader.readAsArrayBuffer(file);
-        } else {
-            alert("Please upload a PDF or Word document.");
+        const storageRef = ref(storage, `resumes/${user?.id}/${file.name}`);  // Create a reference in Firebase Storage
+
+        try {
+            // Upload the file to Firebase Storage
+            await uploadBytes(storageRef, file);
+            const fileUrl = await getDownloadURL(storageRef);  // Get the file's URL
+            setFileUrl(fileUrl);  // Save the URL to state for saving to Firestore
+
+            // Extract text from the file
+            if (fileType === "application/pdf") {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    const pdfData = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                    let text = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(' ');
+                        text += `${pageText}\n`;
+                    }
+                    setResumeText(text);  // Set extracted text for API submission
+                };
+                fileReader.readAsArrayBuffer(file);
+            } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    const arrayBuffer = this.result;
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    setResumeText(result.value);  // Set extracted text for API submission
+                };
+                fileReader.readAsArrayBuffer(file);
+            } else {
+                alert("Please upload a PDF or Word document.");
+            }
+        } catch (error) {
+            console.error("Error uploading file to Firebase Storage:", error);
         }
     };
 
@@ -79,11 +94,12 @@ export default function DashboardPage() {
             return;
         }
 
-        const docRef = await saveResumeToFirebase(resumeText, jobDescription);
+        // Save resume text, job description, and file URL to Firestore
+        const docRef = await saveResumeToFirebase(resumeText, jobDescription, fileUrl);
 
         const formData = {
             jobDescription,
-            resumeText,
+            resumeText,  // Send extracted text to API
             documentId: docRef.id
         };
 
@@ -94,8 +110,11 @@ export default function DashboardPage() {
 
             const tips = response.data.tips;
             if (tips) {
-                const encodedTips = encodeURIComponent(JSON.stringify(tips));
-                router.push(`/resume_tips?tips=${encodedTips}`);
+                // Save tips to Firestore in the same document
+                await updateDoc(doc(db, 'resumes', docRef.id), { tips });
+
+                // Redirect to ResumeTipsPage with the document ID
+                router.push(`/resume_tips?id=${docRef.id}`);
             } else {
                 alert("No tips were generated. Please try again.");
             }

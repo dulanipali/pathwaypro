@@ -21,32 +21,26 @@ export default function DashboardPage() {
     const [resumeText, setResumeText] = useState('');
     const [fileUrl, setFileUrl] = useState('');  // State to hold the file URL
     const [loading, setLoading] = useState(false);
+    const [section, setSection] = useState('resumeTips'); // State for the current section
     const router = useRouter();
 
     // Save resume URL, job description, and generated tips to Firebase
-const saveResumeToFirebase = async (jobDescription, fileUrl, tips) => {
-    try {
-        const docRef = await addDoc(collection(db, 'resumes'), {
-            userId: user?.id,
-            jobDescription,
-            fileUrl,  // Save the file URL in Firestore
-            tips,  // Save generated tips in Firestore
-            createdAt: new Date()
-        });
-        console.log("Resume and job description saved to Firebase with ID:", docRef.id);
-        return docRef;
-    } catch (error) {
-        console.error("Error saving resume and job description to Firebase:", error);
-        throw error;
-    }
-};
-
-
-
-
-
-
-
+    const saveResumeToFirebase = async (jobDescription, fileUrl, tips) => {
+        try {
+            const docRef = await addDoc(collection(db, 'resumes'), {
+                userId: user?.id,
+                jobDescription,
+                fileUrl,  // Save the file URL in Firestore
+                tips,  // Save generated tips in Firestore
+                createdAt: new Date()
+            });
+            console.log("Resume and job description saved to Firebase with ID:", docRef.id);
+            return docRef;
+        } catch (error) {
+            console.error("Error saving resume and job description to Firebase:", error);
+            throw error;
+        }
+    };
 
     // Handle file upload for PDF/Word document and upload to Firebase Storage
     const handleFileUpload = async (e) => {
@@ -95,46 +89,48 @@ const saveResumeToFirebase = async (jobDescription, fileUrl, tips) => {
     };
 
     // Generate tips based on job description and resume text
-   // Generate tips based on job description and resume text
-// Generate tips based on job description and resume text
-const generateTips = async () => {
-    if (!resumeText || !jobDescription) {
-        alert("Please enter a job description and upload your resume.");
-        return;
-    }
+    const generateTips = async () => {
+        if (!resumeText || !jobDescription) {
+            alert("Please enter a job description and upload your resume.");
+            return;
+        }
 
-    try {
-        setLoading(true);
+        try {
+            setLoading(true);
 
-        const formData = {
-            jobDescription,
-            resumeText
-        };
+            const formData = {
+                jobDescription,
+                resumeText
+            };
 
-        // First, save the resume and job description to Firebase and get the document ID
-        const docRef = await saveResumeToFirebase(jobDescription, fileUrl, []);
-        
-        // Then, pass the document ID along with job description and resume text to the API
-        const response = await axios.post('/api/generate', {
-            jobDescription,
-            resumeText,
-            documentId: docRef.id  // Pass document ID to the API
-        });
-        
-        const tips = response.data.tips;
-        
-        // Update Firestore document with generated tips
-        await updateDoc(docRef, { tips });
+            // First, save the resume and job description to Firebase and get the document ID
+            const docRef = await saveResumeToFirebase(jobDescription, fileUrl, []);
+            
+            // Then, pass the document ID along with job description and resume text to the API
+            const response = await axios.post('/api/generate', {
+                jobDescription,
+                resumeText,
+                documentId: docRef.id  // Pass document ID to the API
+            });
+            
+            const tips = response.data.tips;
+            
+            // Update Firestore document with generated tips
+            await updateDoc(docRef, { tips });
 
-        // Redirect to ResumeTipsPage with the document ID
-        router.push(`/resume_tips?id=${docRef.id}`);
-        setLoading(false);
-    } catch (error) {
-        console.error('Failed to generate tips:', error);
-        setLoading(false);
-    }
-};
+            // Redirect to ResumeTipsPage with the document ID
+            router.push(`/resume_tips?id=${docRef.id}`);
+            setLoading(false);
+        } catch (error) {
+            console.error('Failed to generate tips:', error);
+            setLoading(false);
+        }
+    };
 
+    // Navigate to Interview Prep page with job description as a query parameter
+    const handleInterviewPrepNavigation = () => {
+        router.push(`/interview_prep?jobDescription=${encodeURIComponent(jobDescription)}`);
+    };
 
     return (
         <Layout>
@@ -157,77 +153,144 @@ const generateTips = async () => {
                 sx={{ width: '80%', maxWidth: '800px', mx: 'auto' }}
             >
                 <Box
-                    sx={{
-                        backgroundColor: '#1A202C',
-                        padding: '20px',
-                        borderRadius: '10px',
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        width: '100%',
-                        textAlign: 'center',
-                        color: 'white',
-                        border: '2px solid #EB5E28',
-                        mb: 4
-                    }}
+                    display="flex"
+                    justifyContent="space-around"
+                    sx={{ mb: 4, width: '100%' }}
                 >
-                    <ContentCopy sx={{ fontSize: 40, mb: 2 }} />
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                        Paste your job description here
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={4}
-                        variant="outlined"
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
-                    />
+                    <Button
+                        variant={section === 'resumeTips' ? 'contained' : 'outlined'}
+                        sx={{ backgroundColor: '#EB5E28', color: '#FFFFFF', '&:hover': { backgroundColor: '#D14928' } }}
+                        onClick={() => setSection('resumeTips')}
+                    >
+                        Resume Tips
+                    </Button>
+                    <Button
+                        variant={section === 'interviewTips' ? 'contained' : 'outlined'}
+                        sx={{ backgroundColor: '#0055A4', color: '#FFFFFF', '&:hover': { backgroundColor: '#003F8A' } }}
+                        onClick={() => setSection('interviewTips')}
+                    >
+                        Interview Prep
+                    </Button>
                 </Box>
-                
-                <Box
-                    sx={{
-                        backgroundColor: '#1A202C',
-                        padding: '20px',
-                        borderRadius: '10px',
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        width: '100%',
-                        textAlign: 'center',
-                        color: 'white',
-                        border: '2px solid #0055A4',
-                    }}
-                >
-                    <UploadFile sx={{ fontSize: 40, mb: 2 }} />
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                        Upload your resume (PDF or Word):
-                    </Typography>
-                    <input
-                        type="file"
-                        accept=".pdf, .docx"
-                        onChange={handleFileUpload}
-                        style={{ marginBottom: '16px', color: 'white' }}
-                    />
-                    <Typography variant="body1" sx={{ mb: 2 }}>
-                    Paste your resume here, or feel free to edit out any personal information from your uploaded resume before generating tips.
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={6}
-                        variant="outlined"
-                        value={resumeText}
-                        onChange={(e) => setResumeText(e.target.value)}
-                        sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
-                    />
-                </Box>
+
+                {section === 'resumeTips' && (
+                    <>
+                        <Box
+                            sx={{
+                                backgroundColor: '#1A202C',
+                                padding: '20px',
+                                borderRadius: '10px',
+                                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                width: '100%',
+                                textAlign: 'center',
+                                color: 'white',
+                                border: '2px solid #EB5E28',
+                                mb: 4
+                            }}
+                        >
+                            <ContentCopy sx={{ fontSize: 40, mb: 2 }} />
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Paste your job description here
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={4}
+                                variant="outlined"
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                                sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
+                            />
+                        </Box>
+
+                        <Box
+                            sx={{
+                                backgroundColor: '#1A202C',
+                                padding: '20px',
+                                borderRadius: '10px',
+                                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                width: '100%',
+                                textAlign: 'center',
+                                color: 'white',
+                                border: '2px solid #0055A4',
+                            }}
+                        >
+                            <UploadFile sx={{ fontSize: 40, mb: 2 }} />
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Upload your resume (PDF or Word):
+                            </Typography>
+                            <input
+                                type="file"
+                                accept=".pdf, .docx"
+                                onChange={handleFileUpload}
+                                style={{ marginBottom: '16px', color: 'white' }}
+                            />
+                            <Typography variant="body1" sx={{ mb: 2 }}>
+                                Paste your resume here, or feel free to edit out any personal information from your uploaded resume before generating tips.
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={6}
+                                variant="outlined"
+                                value={resumeText}
+                                onChange={(e) => setResumeText(e.target.value)}
+                                sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
+                            />
+                        </Box>
+                    </>
+                )}
+
+                {section === 'interviewTips' && (
+                    <Box
+                        sx={{
+                            backgroundColor: '#1A202C',
+                            padding: '20px',
+                            borderRadius: '10px',
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                            width: '100%',
+                            textAlign: 'center',
+                            color: 'white',
+                            border: '2px solid #0055A4',
+                            mb: 4
+                        }}
+                    >
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                            Paste your job description here for interview tips:
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            sx={{ mb: 2, backgroundColor: 'white', borderRadius: '5px' }}
+                        />
+                    </Box>
+                )}
             </Box>
-            <Button
-                variant="contained"
-                sx={{ mt: 4, backgroundColor: '#EB5E28', color: '#FFFFFF', '&:hover': { backgroundColor: '#D14928' } }}
-                onClick={generateTips}
-                disabled={loading}
-            >
-                {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Generate Resume Tips'}
-            </Button>
+            
+            {section === 'resumeTips' && (
+                <Button
+                    variant="contained"
+                    sx={{ mt: 4, backgroundColor: '#EB5E28', color: '#FFFFFF', '&:hover': { backgroundColor: '#D14928' } }}
+                    onClick={generateTips}
+                    disabled={loading}
+                >
+                    {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Generate Resume Tips'}
+                </Button>
+            )}
+            
+            {section === 'interviewTips' && (
+                <Button
+                    variant="contained"
+                    sx={{ mt: 4, backgroundColor: '#0055A4', color: '#FFFFFF', '&:hover': { backgroundColor: '#003F8A' } }}
+                    onClick={handleInterviewPrepNavigation}
+                >
+                    Generate Interview Prep
+                </Button>
+            )}
         </Layout>
     );
 }

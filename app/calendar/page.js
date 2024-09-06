@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -20,9 +20,10 @@ import {
   IconButton,
 } from "@mui/material";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { useUser } from '@clerk/nextjs'; // Import the user hook from Clerk
 
 import { db } from '../../firebase'; // Ensure Firebase is initialized correctly
-import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'; // Firestore methods
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore'; // Firestore methods
 import Layout from "../propathway_layout";
 
 const tokens = {
@@ -33,17 +34,21 @@ const tokens = {
 };
 
 const Calendar = () => {
+  const { user } = useUser(); // Get the current user from Clerk
   const [currentEvents, setCurrentEvents] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [helpDialogOpen, setHelpDialogOpen] = useState(false); 
   const [newEventTitle, setNewEventTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
-  const [deletingEventId, setDeletingEventId] = useState(null); 
+  const [deletingEventId, setDeletingEventId] = useState(null);
+  const [editingEventId, setEditingEventId] = useState(null); // New state for editing
 
-  // Fetch events from Firestore when the component mounts
   useEffect(() => {
     const fetchEvents = async () => {
-      const querySnapshot = await getDocs(collection(db, 'events'));
+      if (!user) return; // Do not fetch events if user is not logged in
+
+      const q = query(collection(db, 'events'), where('userId', '==', user.id)); // Filter events by user ID
+      const querySnapshot = await getDocs(q);
       const eventsFromFirestore = querySnapshot.docs.map(doc => ({
         id: doc.id,
         title: doc.data().title,
@@ -54,16 +59,19 @@ const Calendar = () => {
     };
 
     fetchEvents();
-  }, []); // Empty dependency array to run the effect once when the component mounts
+  }, [user]); // Depend on the user object
 
   const handleDateClick = (selected) => {
     setSelectedDate(selected.date);
     setNewEventTitle("");
+    setEditingEventId(null); // Ensure no event is being edited
     setIsOpen(true);
   };
 
   const handleEventClick = (selected) => {
-    setDeletingEventId(selected.event.id); 
+    setEditingEventId(selected.event.id); // Set event ID for editing
+    setNewEventTitle(selected.event.title); // Pre-fill the title for editing
+    setSelectedDate(selected.event.start);
     setIsOpen(true);
   };
 
@@ -71,10 +79,8 @@ const Calendar = () => {
     if (!deletingEventId) return;
 
     try {
-      // Delete the event from Firestore
       await deleteDoc(doc(db, 'events', deletingEventId));
 
-      // Update the local state to remove the event
       setCurrentEvents(currentEvents.filter((event) => event.id !== deletingEventId));
 
       setIsOpen(false); 
@@ -84,25 +90,33 @@ const Calendar = () => {
     }
   };
 
-  const handleAddEvent = async () => {
+  const handleAddOrUpdateEvent = async () => {
     if (!selectedDate || !newEventTitle) return;
 
-    const newEvent = {
+    const eventData = {
       title: newEventTitle,
       start: selectedDate,
-      allDay: true, 
+      allDay: true,
+      userId: user.id, // Add user ID to the event data
     };
 
-    // Add the new event to Firestore
     try {
-      const docRef = await addDoc(collection(db, 'events'), newEvent);
-      console.log("Document written with ID: ", docRef.id);
+      if (editingEventId) {
+        // Update the existing event
+        await updateDoc(doc(db, 'events', editingEventId), eventData);
 
-      // Update the state after saving to Firestore
-      setCurrentEvents([...currentEvents, { ...newEvent, id: docRef.id }]);
+        setCurrentEvents(currentEvents.map(event =>
+          event.id === editingEventId ? { ...eventData, id: editingEventId } : event
+        ));
+      } else {
+        // Add a new event
+        const docRef = await addDoc(collection(db, 'events'), eventData);
+        setCurrentEvents([...currentEvents, { ...eventData, id: docRef.id }]);
+      }
       setIsOpen(false);
+      setEditingEventId(null); // Clear editing state
     } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error("Error adding/updating document: ", e);
     }
   };
 
@@ -115,12 +129,12 @@ const Calendar = () => {
   };
 
   return (
-    <Layout> {/* Wrap the content with Layout */}
+    <Layout>
       <Box display="flex" sx={{ height: 'calc(100vh - 64px)', overflow: 'hidden', padding: '0' }}>
         {/* CALENDAR SIDEBAR */}
         <Box
           sx={{
-            width: "20%", // Increase the sidebar width to give space for buttons
+            width: "20%",
             backgroundColor: tokens.darkBlue,
             padding: "15px",
             borderRadius: "8px",
@@ -129,7 +143,7 @@ const Calendar = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            overflowY: 'auto', // Allow scrolling if the content exceeds height
+            overflowY: 'auto',
           }}
         >
           <Box>
@@ -167,7 +181,10 @@ const Calendar = () => {
                   <Button
                     variant="outlined"
                     sx={{ color: tokens.textPrimary, borderColor: tokens.textPrimary, marginTop: '10px', alignSelf: 'center' }}
-                    onClick={() => handleEventClick({ event })}
+                    onClick={() => {
+                      setDeletingEventId(event.id); 
+                      setIsOpen(true);
+                    }}
                   >
                     Delete
                   </Button>
@@ -195,7 +212,7 @@ const Calendar = () => {
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             headerToolbar={{
               left: "prev,next today",
-              center: "title", // This ensures the month is displayed
+              center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth",
             }}
             titleFormat={{ year: 'numeric', month: 'long' }} 
@@ -206,11 +223,11 @@ const Calendar = () => {
             dayMaxEvents={true}
             events={currentEvents} 
             dateClick={handleDateClick}
+            eventClick={handleEventClick} // Handle event click to edit
             eventDidMount={(info) => {
               info.el.style.backgroundColor = tokens.orange;
               info.el.style.color = '#FFFFFF'; 
             }}
-            // Style the title to display in black
             customButtons={{
               title: {
                 text: "Title",
@@ -236,7 +253,8 @@ const Calendar = () => {
         <Dialog open={isOpen && deletingEventId !== null} onClose={() => setIsOpen(false)}>
           <DialogTitle>Confirm Delete Event</DialogTitle>
           <DialogContent sx={{ padding: '20px' }}>
-            <Typography>Are you sure you want to delete this event?</Typography>
+            <Typography>Are you sure you want to delete this event?
+            ?</Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setIsOpen(false)} color="primary">
@@ -248,11 +266,11 @@ const Calendar = () => {
           </DialogActions>
         </Dialog>
 
-        {/* ADD EVENT DIALOG */}
-        <Dialog open={isOpen && !deletingEventId} onClose={() => setIsOpen(false)}>
+        {/* ADD/EDIT EVENT DIALOG */}
+        <Dialog open={isOpen && (editingEventId !== null || deletingEventId === null)} onClose={() => setIsOpen(false)}>
           <Box p="20px" sx={{ padding: '20px' }}>
             <Typography variant="h6" gutterBottom>
-              Add New Event
+              {editingEventId ? "Edit Event" : "Add New Event"}
             </Typography>
             <TextField
               label="Event Title"
@@ -265,9 +283,9 @@ const Calendar = () => {
             <Button
               variant="contained"
               sx={{ backgroundColor: tokens.orange, color: '#FFFFFF', marginTop: '15px' }}
-              onClick={handleAddEvent}
+              onClick={handleAddOrUpdateEvent}
             >
-              Add Event
+              {editingEventId ? "Update Event" : "Add Event"}
             </Button>
           </Box>
         </Dialog>
@@ -286,7 +304,10 @@ const Calendar = () => {
               <strong>2. Viewing Events:</strong> Events are listed on the left sidebar under "Events". You can see all events scheduled on the calendar.
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>3. Deleting an Event:</strong> To delete an event, click on the event in the sidebar, and then click the "Delete" button in the dialog that appears.
+              <strong>3. Editing an Event:</strong> Click on an event in the calendar or sidebar to edit it. Modify the details and click "Update Event" to save changes.
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>4. Deleting an Event:</strong> To delete an event, click on the event in the sidebar and confirm deletion in the dialog that appears.
             </Typography>
             <Typography variant="body2">
               If you need more help, feel free to reach out to the support team!
@@ -299,7 +320,7 @@ const Calendar = () => {
           </DialogActions>
         </Dialog>
       </Box>
-    </Layout> 
+    </Layout>
   );
 };
 

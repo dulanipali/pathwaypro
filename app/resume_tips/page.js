@@ -172,12 +172,6 @@ export default function ResumeTipsPage() {
                 </Box>
             </Box>
 
-            {/* Interview Prep Button */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                <Button variant="contained" color="primary" onClick={handleInterviewPrep}>
-                    Interview Prep
-                </Button>
-            </Box>
         </Layout>
     );
 }

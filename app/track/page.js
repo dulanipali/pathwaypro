@@ -1,12 +1,13 @@
 'use client'
 import Layout from "../propathway_layout";
 import {
-    Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Paper, styled, Box, Dialog, Typography, TextField, Button, Select, InputLabel, MenuItem, IconButton, FormControl
+    Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Paper, styled, Box, Dialog, Typography, TextField, Button, Select, InputLabel, MenuItem, IconButton, FormControl, DialogActions, DialogContent
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useUser } from '@clerk/nextjs';
 
@@ -40,6 +41,7 @@ export default function TrackApplications() {
     const [status, setStatus] = useState("");
     const [jobApplications, setJobApplications] = useState([]);
     const [editRowIndex, setEditRowIndex] = useState(null);
+    const [errorPopupOpen, setErrorPopupOpen] = useState(false);
     const { user } = useUser();
 
     useEffect(() => {
@@ -75,7 +77,7 @@ export default function TrackApplications() {
 
     const handleAddJob = async () => {
         if (!jobTitle || !company || !stage || !status) {
-            alert("Please fill in all required fields");
+            setErrorPopupOpen(true); // Show error popup
             return;
         }
 
@@ -102,24 +104,51 @@ export default function TrackApplications() {
         setEditRowIndex(index);
     };
 
-    const handleUpdate = async (index, field, value) => {
+    const handleUpdate = async (index) => {
+        const jobApp = jobApplications[index];
+        if (!jobApp.jobTitle || !jobApp.company || !jobApp.stage || !jobApp.status) {
+            setErrorPopupOpen(true); // Show error popup if any required fields are empty
+            return;
+        }
+
+        try {
+            const jobDocRef = doc(db, "jobApplications", jobApp.id);
+            await updateDoc(jobDocRef, {
+                jobTitle: jobApp.jobTitle,
+                company: jobApp.company,
+                location: jobApp.location,
+                pay: jobApp.pay,
+                stage: jobApp.stage,
+                status: jobApp.status,
+            });
+            setEditRowIndex(null);
+        } catch (error) {
+            console.error("Error updating document: ", error);
+        }
+    };
+
+    const handleFieldChange = (index, field, value) => {
         const updatedJobApplications = [...jobApplications];
         updatedJobApplications[index] = {
             ...updatedJobApplications[index],
             [field]: value,
         };
         setJobApplications(updatedJobApplications);
+    };
 
+    const handleDelete = async (index) => {
+        const jobToDelete = jobApplications[index];
         try {
-            const jobDocRef = doc(db, "jobApplications", updatedJobApplications[index].id);
-            await updateDoc(jobDocRef, { [field]: value }); 
+            await deleteDoc(doc(db, "jobApplications", jobToDelete.id));
+            const updatedJobApplications = jobApplications.filter((_, i) => i !== index);
+            setJobApplications(updatedJobApplications);
         } catch (error) {
-            console.error("Error updating document: ", error);
+            console.error("Error deleting document: ", error);
         }
     };
 
-    const handleSave = () => {
-        setEditRowIndex(null);
+    const handleCloseErrorPopup = () => {
+        setErrorPopupOpen(false);
     };
 
     return (
@@ -157,7 +186,7 @@ export default function TrackApplications() {
                                                     fullWidth
                                                     value={jobApp.jobTitle}
                                                     onChange={(e) =>
-                                                        handleUpdate(index, 'jobTitle', e.target.value)
+                                                        handleFieldChange(index, 'jobTitle', e.target.value)
                                                     }
                                                 />
                                             </StyledTableCell>
@@ -167,7 +196,7 @@ export default function TrackApplications() {
                                                     fullWidth
                                                     value={jobApp.company}
                                                     onChange={(e) =>
-                                                        handleUpdate(index, 'company', e.target.value)
+                                                        handleFieldChange(index, 'company', e.target.value)
                                                     }
                                                 />
                                             </StyledTableCell>
@@ -177,7 +206,7 @@ export default function TrackApplications() {
                                                     fullWidth
                                                     value={jobApp.location}
                                                     onChange={(e) =>
-                                                        handleUpdate(index, 'location', e.target.value)
+                                                        handleFieldChange(index, 'location', e.target.value)
                                                     }
                                                 />
                                             </StyledTableCell>
@@ -187,7 +216,7 @@ export default function TrackApplications() {
                                                     fullWidth
                                                     value={jobApp.pay}
                                                     onChange={(e) =>
-                                                        handleUpdate(index, 'pay', e.target.value)
+                                                        handleFieldChange(index, 'pay', e.target.value)
                                                     }
                                                 />
                                             </StyledTableCell>
@@ -196,7 +225,7 @@ export default function TrackApplications() {
                                                 <Select
                                                     value={jobApp.stage}
                                                     onChange={(e) =>
-                                                        handleUpdate(index, 'stage', e.target.value)
+                                                        handleFieldChange(index, 'stage', e.target.value)
                                                     }
                                                     fullWidth
                                                 >
@@ -211,7 +240,7 @@ export default function TrackApplications() {
                                                 <Select
                                                     value={jobApp.status}
                                                     onChange={(e) =>
-                                                        handleUpdate(index, 'status', e.target.value)
+                                                        handleFieldChange(index, 'status', e.target.value)
                                                     }
                                                     fullWidth
                                                 >
@@ -250,7 +279,7 @@ export default function TrackApplications() {
 
                                     <StyledTableCell align="right">
                                         {editRowIndex === index ? (
-                                            <IconButton onClick={handleSave}>
+                                            <IconButton onClick={() => handleUpdate(index)}>
                                                 <DoneIcon />
                                             </IconButton>
                                         ) : (
@@ -260,6 +289,9 @@ export default function TrackApplications() {
                                                 <EditIcon />
                                             </IconButton>
                                         )}
+                                        <IconButton onClick={() => handleDelete(index)}>
+                                            <DeleteIcon />
+                                        </IconButton>
                                     </StyledTableCell>
                                 </StyledTableRow>
                             ))}
@@ -338,6 +370,18 @@ export default function TrackApplications() {
                             </Button>
                         </Box>
                     </Box>
+                </Dialog>
+
+                {/* Error Dialog for empty fields */}
+                <Dialog open={errorPopupOpen} onClose={handleCloseErrorPopup}>
+                    <DialogContent>
+                        <Typography color="error">Please fill in all required fields.</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseErrorPopup} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
                 </Dialog>
             </Box>
         </Layout>

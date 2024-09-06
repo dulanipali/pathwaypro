@@ -30,11 +30,11 @@ export default function ApplicationInsights() {
                 const resumesList = querySnapshot.docs.map((doc, index) => ({
                     id: doc.id,
                     ...doc.data(),
-                    name: savedInsightNames[index] || `Insight #${index + 1}`, // Default name or local storage
+                    name: savedInsightNames[index] || `Insight #${index + 1}`, // Apply default name if not in local storage
                     createdAt: doc.data().createdAt.toDate(), // Convert Firestore timestamp to Date
                 }));
                 setResumes(resumesList);
-                setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`));
+                setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`)); // Default or stored names
             } catch (error) {
                 console.error("Error fetching resumes:", error);
             }
@@ -84,9 +84,16 @@ export default function ApplicationInsights() {
     const handleDelete = async (id) => {
         try {
             await deleteDoc(doc(db, "resumes", id));  // Delete the document from Firestore
-            setResumes(resumes.filter(resume => resume.id !== id));  // Remove from local state
-            setInsightNames(insightNames.filter((_, index) => index !== resumes.findIndex(resume => resume.id === id)));  // Update local state
-            saveInsightNamesToLocalStorage(insightNames); // Save updated names to local storage
+            const indexToDelete = resumes.findIndex(resume => resume.id === id);
+
+            // Remove the deleted resume and its corresponding name
+            const updatedResumes = resumes.filter(resume => resume.id !== id);
+            const updatedInsightNames = insightNames.filter((_, index) => index !== indexToDelete);
+
+            setResumes(updatedResumes);  // Update the local state for resumes
+            setInsightNames(updatedInsightNames);  // Update the local state for names
+            saveInsightNamesToLocalStorage(updatedInsightNames); // Save updated names to local storage
+
             setEditModalOpen(false); // Close modal after deleting
             console.log('Document deleted successfully');
         } catch (error) {
@@ -157,7 +164,7 @@ export default function ApplicationInsights() {
                         <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#EB5E28', mb: 2 }}>
                             How to Use Application Insights
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#333' }}>
+                        <Typography variant="body1" sx={{ color: '#000000' }}> {/* Changed to black */}
                             This page displays all your uploaded resumes, job descriptions and tips with the following features:
                         </Typography>
                         <ul>

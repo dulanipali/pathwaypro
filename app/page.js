@@ -121,7 +121,6 @@ export default function Home() {
                 <Box sx={{
                     backgroundColor: '#0A1128',
                     //                background: "linear-gradient(170deg, #0A1128 32.27%, #001F54 51.49%, #034078 71.03%, #0A1128 99.51%)",
-
                     width: '100vw',
                     py: 8,
                     px: 4,

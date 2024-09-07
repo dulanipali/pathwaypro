@@ -62,7 +62,7 @@ export default function ResumeTipsPage() {
     return (
         <Layout>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4, mt: 4 }}>
-                
+
                 {/* File Embed Preview (Left) */}
                 <Box
                     sx={{
@@ -74,13 +74,13 @@ export default function ResumeTipsPage() {
                         textAlign: 'center',
                     }}
                 >
-                    <Typography 
-                        variant="h5" 
-                        sx={{ 
-                            color: '#FF6F42', 
-                            mb: 2, 
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            color: '#FF6F42',
+                            mb: 2,
                             textAlign: 'center',
-                            fontFamily: "'Playfair Display', serif"  
+                            fontFamily: "'Playfair Display', serif"
                         }}
                     >
                         Your Uploaded Resume
@@ -92,19 +92,19 @@ export default function ResumeTipsPage() {
                     ) : fileUrl ? (
                         <Box>
                             {isPdf ? (
-                                <iframe 
-                                    src={`${fileUrl}#zoom=50`}  
-                                    width="100%" 
-                                    height="600px"  
+                                <iframe
+                                    src={`${fileUrl}#zoom=50`}
+                                    width="100%"
+                                    height="600px"
                                     style={{ border: 'none', borderRadius: '8px' }}
                                     title="Resume Preview"
                                 />
                             ) : (
-                                <iframe 
-                                    src={`https://docs.google.com/viewer?url=${fileUrl}&embedded=true`} 
-                                    width="100%" 
-                                    height="600px"  
-                                    style={{ border: 'none', borderRadius: '8px' }}  
+                                <iframe
+                                    src={`https://docs.google.com/viewer?url=${fileUrl}&embedded=true`}
+                                    width="100%"
+                                    height="600px"
+                                    style={{ border: 'none', borderRadius: '8px' }}
                                     title="Resume Preview"
                                 />
                             )}
@@ -124,20 +124,20 @@ export default function ResumeTipsPage() {
                 {/* Tips Card (Right) */}
                 <Box
                     sx={{
-                        width: '40%',  
+                        width: '40%',
                         backgroundColor: '#0A1128',
                         p: 3,
                         borderRadius: '10px',
                         border: '2px solid #FF6F42',
                     }}
                 >
-                    <Typography 
-                        variant="h5" 
-                        sx={{ 
-                            color: '#FF6F42', 
-                            mb: 2, 
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            color: '#FF6F42',
+                            mb: 2,
                             textAlign: 'center',
-                            fontFamily: "'Playfair Display', serif"  
+                            fontFamily: "'Playfair Display', serif"
                         }}
                     >
                         Tips
@@ -154,9 +154,9 @@ export default function ResumeTipsPage() {
                                     component="li"
                                     variant="body1"
                                     sx={{
-                                        listStyleType: '"⟡ "',  
-                                        fontFamily: "'Roboto', sans-serif",  
-                                        color: 'white',  
+                                        listStyleType: '"⟡ "',
+                                        fontFamily: "'Roboto', sans-serif",
+                                        color: 'white',
                                         mb: 1
                                     }}
                                 >

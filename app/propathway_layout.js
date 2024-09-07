@@ -1,7 +1,11 @@
-import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, IconButton, Button } from '@mui/material';
+import { useState } from 'react';
+import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, IconButton, Menu, MenuItem } from '@mui/material';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { Logout } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import { UserButton } from '@clerk/nextjs';
+import { dark, shadesOfPurple } from '@clerk/themes'
+import EventIcon from '@mui/icons-material/Event';
 
 export default function Layout({ children }) {
   const { user } = useUser();
@@ -12,65 +16,85 @@ export default function Layout({ children }) {
     router.push(path);
   };
 
-  return (
-    <Container
-      maxWidth={false}
-      disableGutters
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0677A1, #C1C8E4,#8860D0,#84CEEB)',
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <CssBaseline />
-
-      {/* AppBar with Direct Navigation Items */}
-      <AppBar
-        position="static"
-        sx={{ backgroundColor: '#464866', boxShadow: 'none', width: '100%' }}
-      >
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          {/* Title */}
-          <Typography
-            variant="h6"
-            sx={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}
-          >
-            ProPathway
-          </Typography>
-
-          {/* Navigation Items */}
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button color="inherit" onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white' }}>
-              Dashboard
-            </Button>
-            <Button color="inherit" onClick={() => handleNavigation('/track')} sx={{ color: 'white' }}>
-              Track Applications
-            </Button>
-            <Button color="inherit" onClick={() => handleNavigation('/resumes')} sx={{ color: 'white' }}>
-              Application Insights
-            </Button>
-            <Button color="inherit" onClick={() => handleNavigation('/calendar')} sx={{ color: 'white' }}>
-              Calendar
-            </Button>
-          </Box>
-
-          {/* Logout Button */}
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={() => signOut()}
+    return (
+        <Container
+            maxWidth={false}
+            disableGutters
             sx={{
-              ml: 2,
-              color: 'white',
+                minHeight: '100vh',
+                background: 'linear-gradient(135deg, #0677A1, #C1C8E4,#8860D0,#84CEEB)',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
             }}
-          >
-            <Logout />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+        >
+            <CssBaseline />
+
+            <AppBar position="static" sx={{ backgroundColor: '#464866', boxShadow: 'none', width: '100%' }}>
+                <Toolbar>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        onClick={handleOpenNavMenu}
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon></MenuIcon>
+                    </IconButton>
+                    <Menu
+                        id="menu-appbar"
+                        anchorEl={anchorElNav}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left',
+                        }}
+                        open={Boolean(anchorElNav)}
+                        onClose={handleCloseNavMenu}
+                        sx={{
+                            '& .MuiPaper-root': {
+                                backgroundColor: '#464866'
+                            }
+                        }}
+                    >
+                        <MenuItem onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white', textAlign: 'left' }}>
+                            <Typography>Dashboard</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigation('/track')} sx={{ color: 'white', textAlign: 'left' }}>
+                            <Typography>Track Applications</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigation('/resumes')} sx={{ color: 'white', textAlign: 'left' }}>
+                            <Typography>Application Insights</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', textAlign: 'left' }}>
+                            <Typography>Calendar</Typography>
+                        </MenuItem>
+                    </Menu>
+
+                    <Typography variant="h6" sx={{ flexGrow: 1, fontFamily: 'Roboto, sans-serif', color: 'white' }}>
+                        ProPathway
+                    </Typography>
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={() => signOut()}
+                        sx={{
+                            ml: 2,
+                            color: 'white',
+                        }}
+                    >
+                        <Logout />
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
 
       {/* Main Content Area */}
       <Box

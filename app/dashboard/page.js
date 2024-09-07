@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Typography, Box, Button, TextField, CircularProgress } from '@mui/material';
+import { Typography, Box, Button, TextField, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import UploadFile from '@mui/icons-material/UploadFile';
@@ -23,7 +23,17 @@ export default function DashboardPage() {
     const [fileUrl, setFileUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [section, setSection] = useState('resumeTips');
+    const [error, setError] = useState('');
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+
     const router = useRouter();
+
+    const handleSnackbarClose = () => setSnackbarOpen(false);
+
+    const showError = (message) => {
+        setError(message);
+        setSnackbarOpen(true);
+    };
 
     const saveResumeToFirebase = async (jobDescription, fileUrl, tips) => {
         try {
@@ -42,7 +52,10 @@ export default function DashboardPage() {
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) {
+            showError("No file selected.")
+            return;
+        }
 
         const fileType = file.type;
         const storageRef = ref(storage, `resumes/${user?.id}/${file.name}`);
@@ -54,7 +67,7 @@ export default function DashboardPage() {
 
             if (fileType === "application/pdf") {
                 const fileReader = new FileReader();
-                fileReader.onload = async function() {
+                fileReader.onload = async function () {
                     const pdfData = new Uint8Array(this.result);
                     const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
                     let text = '';
@@ -69,43 +82,55 @@ export default function DashboardPage() {
                 fileReader.readAsArrayBuffer(file);
             } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
                 const fileReader = new FileReader();
-                fileReader.onload = async function() {
+                fileReader.onload = async function () {
                     const arrayBuffer = this.result;
                     const result = await mammoth.extractRawText({ arrayBuffer });
                     setResumeText(result.value);
                 };
                 fileReader.readAsArrayBuffer(file);
             } else {
-                alert("Please upload a PDF or Word document.");
+                showError("Please upload a PDF or Word document.");
             }
         } catch (error) {
+            showError("Error uploading file");
             console.error("Error uploading file:", error);
         }
     };
 
     const generateTips = async () => {
-        if (!resumeText || !jobDescription) {
-            alert("Please enter a job description and upload your resume.");
+        if (!resumeText && !jobDescription) {
+            showError("Please enter a job description and upload your resume.");
             return;
+        } else {
+            if (!resumeText && jobDescription) {
+                showError("Please upload your resume.");
+                return;
+            } else {
+                if (resumeText && !jobDescription) {
+                    showError("Please enter a job description.");
+                    return;
+                }
+            }
         }
 
         try {
             setLoading(true);
 
             const docRef = await saveResumeToFirebase(jobDescription, fileUrl, []);
-            
+
             const response = await axios.post('/api/generate', {
                 jobDescription,
                 resumeText,
                 documentId: docRef.id
             });
-            
+
             const tips = response.data.tips;
             await updateDoc(docRef, { tips });
 
             router.push(`/resume_tips?id=${docRef.id}`);
         } catch (error) {
             setLoading(false);
+            showError("Failed to generate tips. Please try again.")
         }
     };
 
@@ -116,17 +141,20 @@ export default function DashboardPage() {
     return (
         <div style={{ backgroundColor: '#2D4159', minHeight: '100vh', overflow: 'hidden' }}>
             <Layout>
-                <Typography 
-                    variant="h4" 
-                    sx={{ 
-                        color: '#FFFFFF', 
-                        fontFamily: "'Playfair Display', serif",
-                        fontWeight: 'bold',
-                        mb: 4
+                {/*} <Typography
+                    variant="h3"
+                    sx={{
+                        color: '#FFFFFF',
+                        textAlign: 'center',
+                        //fontWeight: 'bold',
+                        //marginTop: '60px',
+                        mb: 4,
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.7)'
                     }}
                 >
+
                     Hi {user?.firstName}, Welcome to <span style={{ color: '#0677A1' }}>ProPathway!</span>
-                </Typography>
+                </Typography>*/}
                 <Box
                     display="flex"
                     flexDirection="column"
@@ -141,10 +169,10 @@ export default function DashboardPage() {
                     >
                         <Button
                             variant={section === 'resumeTips' ? 'contained' : 'outlined'}
-                            sx={{ 
-                                backgroundColor: section === 'resumeTips' ? '#0677A1' : 'transparent', 
-                                color: '#FFFFFF', 
-                                '&:hover': { backgroundColor: '#78244C' } 
+                            sx={{
+                                backgroundColor: section === 'resumeTips' ? '#0677A1' : 'transparent',
+                                color: '#FFFFFF',
+                                '&:hover': { backgroundColor: '#78244C' }
                             }}
                             onClick={() => setSection('resumeTips')}
                         >
@@ -152,17 +180,17 @@ export default function DashboardPage() {
                         </Button>
                         <Button
                             variant={section === 'interviewTips' ? 'contained' : 'outlined'}
-                            sx={{ 
-                                backgroundColor: section === 'interviewTips' ? '#895061' : 'transparent', 
-                                color: '#FFFFFF', 
-                                '&:hover': { backgroundColor: '#59253A' } 
+                            sx={{
+                                backgroundColor: section === 'interviewTips' ? '#895061' : 'transparent',
+                                color: '#FFFFFF',
+                                '&:hover': { backgroundColor: '#59253A' }
                             }}
                             onClick={() => setSection('interviewTips')}
                         >
                             Interview Prep
                         </Button>
                     </Box>
-    
+
                     {section === 'resumeTips' && (
                         <Box
                             display="flex"
@@ -190,11 +218,12 @@ export default function DashboardPage() {
                                     rows={10}
                                     variant="outlined"
                                     value={jobDescription}
+                                    helperText={"Make sure to include the resposibilities"}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />
                             </Box>
-    
+
                             <Box
                                 sx={{
                                     padding: '20px',
@@ -231,7 +260,7 @@ export default function DashboardPage() {
                             </Box>
                         </Box>
                     )}
-    
+
                     {section === 'interviewTips' && (
                         <Box
                             sx={{
@@ -265,7 +294,7 @@ export default function DashboardPage() {
                             </Button>
                         </Box>
                     )}
-    
+
                     <Button
                         variant="contained"
                         onClick={generateTips}
@@ -276,6 +305,16 @@ export default function DashboardPage() {
                     </Button>
                 </Box>
             </Layout>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
+                    {error}
+                </Alert>
+            </Snackbar>
         </div>
     );
 }

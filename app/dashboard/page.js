@@ -2,16 +2,17 @@
 import { useState } from 'react';
 import { Typography, Box, Button, TextField, CircularProgress } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
-import { ContentCopy, UploadFile } from '@mui/icons-material';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import UploadFile from '@mui/icons-material/UploadFile';
 import axios from 'axios';
 import Layout from '../propathway_layout';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '../../firebase';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';  
-import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.entry';  
-import mammoth from 'mammoth';  
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.entry';
+import mammoth from 'mammoth';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -33,10 +34,8 @@ export default function DashboardPage() {
                 tips,
                 createdAt: new Date()
             });
-            console.log("Resume and job description saved to Firebase with ID:", docRef.id);
             return docRef;
         } catch (error) {
-            console.error("Error saving resume and job description to Firebase:", error);
             throw error;
         }
     };
@@ -80,7 +79,7 @@ export default function DashboardPage() {
                 alert("Please upload a PDF or Word document.");
             }
         } catch (error) {
-            console.error("Error uploading file to Firebase Storage:", error);
+            console.error("Error uploading file:", error);
         }
     };
 
@@ -93,11 +92,6 @@ export default function DashboardPage() {
         try {
             setLoading(true);
 
-            const formData = {
-                jobDescription,
-                resumeText
-            };
-
             const docRef = await saveResumeToFirebase(jobDescription, fileUrl, []);
             
             const response = await axios.post('/api/generate', {
@@ -107,13 +101,10 @@ export default function DashboardPage() {
             });
             
             const tips = response.data.tips;
-            
             await updateDoc(docRef, { tips });
 
             router.push(`/resume_tips?id=${docRef.id}`);
-            setLoading(false);
         } catch (error) {
-            console.error('Failed to generate tips:', error);
             setLoading(false);
         }
     };
@@ -123,7 +114,7 @@ export default function DashboardPage() {
     };
 
     return (
-        <div style={{ backgroundColor: 'green', minHeight: '100vh', overflow: 'hidden' }}>
+        <div style={{ backgroundColor: '#2D4159', minHeight: '100vh', overflow: 'hidden' }}>
             <Layout>
                 <Typography 
                     variant="h4" 
@@ -134,7 +125,7 @@ export default function DashboardPage() {
                         mb: 4
                     }}
                 >
-                    Hi {user?.firstName}, Welcome to <span style={{ color: '#5680E9' }}>ProPathway!</span>
+                    Hi {user?.firstName}, Welcome to <span style={{ color: '#0677A1' }}>ProPathway!</span>
                 </Typography>
                 <Box
                     display="flex"
@@ -150,36 +141,43 @@ export default function DashboardPage() {
                     >
                         <Button
                             variant={section === 'resumeTips' ? 'contained' : 'outlined'}
-                            sx={{ backgroundColor: section === 'resumeTips' ? '#5680E9' : 'transparent', color: '#FFFFFF', '&:hover': { backgroundColor: '#84CEEB' } }}
+                            sx={{ 
+                                backgroundColor: section === 'resumeTips' ? '#0677A1' : 'transparent', 
+                                color: '#FFFFFF', 
+                                '&:hover': { backgroundColor: '#78244C' } 
+                            }}
                             onClick={() => setSection('resumeTips')}
                         >
                             Resume Tips
                         </Button>
                         <Button
                             variant={section === 'interviewTips' ? 'contained' : 'outlined'}
-                            sx={{ backgroundColor: section === 'interviewTips' ? '#8860D0' : 'transparent', color: '#FFFFFF', '&:hover': { backgroundColor: '#5AB9EA' } }}
+                            sx={{ 
+                                backgroundColor: section === 'interviewTips' ? '#895061' : 'transparent', 
+                                color: '#FFFFFF', 
+                                '&:hover': { backgroundColor: '#59253A' } 
+                            }}
                             onClick={() => setSection('interviewTips')}
                         >
                             Interview Prep
                         </Button>
                     </Box>
-
+    
                     {section === 'resumeTips' && (
                         <Box
                             display="flex"
-                            justifyContent="space-between"
-                            sx={{ width: '100%', mb: 4 }}
+                            justifyContent="space-around"
+                            sx={{ mb: 4, width: '100%' }}
                         >
                             <Box
                                 sx={{
-                                    backgroundColor: '#1A202C',
                                     padding: '20px',
                                     borderRadius: '10px',
                                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                                     width: '48%',
                                     textAlign: 'center',
                                     color: 'white',
-                                    border: '2px solid #5680E9',
+                                    border: '2px solid #0677A1',
                                 }}
                             >
                                 <ContentCopy sx={{ fontSize: 40, mb: 2 }} />
@@ -193,20 +191,19 @@ export default function DashboardPage() {
                                     variant="outlined"
                                     value={jobDescription}
                                     onChange={(e) => setJobDescription(e.target.value)}
-                                    sx={{ backgroundColor: 'white', borderRadius: '5px' }}
+                                    sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />
                             </Box>
-
+    
                             <Box
                                 sx={{
-                                    backgroundColor: '#1A202C',
                                     padding: '20px',
                                     borderRadius: '10px',
                                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                                     width: '48%',
                                     textAlign: 'center',
                                     color: 'white',
-                                    border: '2px solid #8860D0',
+                                    border: '2px solid #895061',
                                 }}
                             >
                                 <UploadFile sx={{ fontSize: 40, mb: 2 }} />
@@ -229,23 +226,22 @@ export default function DashboardPage() {
                                     variant="outlined"
                                     value={resumeText}
                                     onChange={(e) => setResumeText(e.target.value)}
-                                    sx={{ backgroundColor: 'white', borderRadius: '5px' }}
+                                    sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />
                             </Box>
                         </Box>
                     )}
-
+    
                     {section === 'interviewTips' && (
                         <Box
                             sx={{
-                                backgroundColor: '#1A202C',
                                 padding: '20px',
                                 borderRadius: '10px',
                                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                                 width: '100%',
                                 textAlign: 'center',
                                 color: 'white',
-                                border: '2px solid #5680E9',
+                                border: '2px solid #0677A1',
                             }}
                         >
                             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -258,31 +254,25 @@ export default function DashboardPage() {
                                 variant="outlined"
                                 value={jobDescription}
                                 onChange={(e) => setJobDescription(e.target.value)}
-                                sx={{ backgroundColor: 'white', borderRadius: '5px' }}
+                                sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                             />
                             <Button
                                 variant="contained"
-                                sx={{ mt: 2, backgroundColor: '#5680E9', color: '#FFFFFF', '&:hover': { backgroundColor: '#84CEEB' } }}
+                                sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
                                 onClick={handleInterviewPrepNavigation}
                             >
-                                Generate Interview Questions
+                                Get Interview Prep Tips
                             </Button>
                         </Box>
                     )}
-
-                    {loading && <CircularProgress sx={{ color: '#84CEEB', mt: 4 }} />}
+    
                     <Button
                         variant="contained"
-                        sx={{
-                            mt: 4,
-                            backgroundColor: '#5680E9',
-                            color: '#FFFFFF',
-                            '&:hover': { backgroundColor: '#84CEEB' }
-                        }}
                         onClick={generateTips}
+                        sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
                         disabled={loading}
                     >
-                        Generate Resume Tips
+                        {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
                     </Button>
                 </Box>
             </Layout>

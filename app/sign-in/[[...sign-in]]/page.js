@@ -10,13 +10,13 @@ export default function SignInPage() {
             disableGutters
             sx={{
                 minHeight: '100vh',
-                backgroundColor: '#0A1128', 
+                backgroundColor: '#0A1128',
                 padding: 0,
                 margin: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',  
-                alignItems: 'center',  
+                justifyContent: 'center',
+                alignItems: 'center',
             }}
         >
             <CssBaseline />
@@ -28,13 +28,13 @@ export default function SignInPage() {
                     <Typography variant="h6" sx={{ flexGrow: 1, fontFamily: 'Roboto, sans-serif', color: 'white' }}>
                         ProPathway
                     </Typography>
-                    <Link href="/sign-up" passHref> 
+                    <Link href="/sign-up" passHref>
                         <Button
                             color="inherit"
                             sx={{
                                 mx: 1,
                                 color: 'white',
-                                '&:hover': { backgroundColor: '#0055A4' }, 
+                                '&:hover': { backgroundColor: '#0055A4' },
                                 transition: 'background-color 0.3s ease',
                                 borderRadius: '20px',
                                 fontFamily: "'Lato', sans-serif",
@@ -59,17 +59,19 @@ export default function SignInPage() {
                 </Typography>
                 <Box
                     sx={{
-                        backgroundColor: '#1A202C', 
+                        backgroundColor: '#1A202C',
                         padding: '20px',
                         borderRadius: '10px',
                         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                         width: '100%',
                         maxWidth: '400px',
                         display: 'flex',
-                        justifyContent: 'center', 
+                        justifyContent: 'center',
                     }}
                 >
-                    <SignIn afterSignInUrl="/dashboard" /> 
+                    <SignIn afterSignInUrl="/dashboard"
+                        signUpUrl="/sign-up"
+                    />
                 </Box>
             </Box>
         </Container>

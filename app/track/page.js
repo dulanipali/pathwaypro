@@ -50,7 +50,7 @@ export default function TrackApplications() {
                 const q = query(collection(db, 'jobApplications'), where("userId", "==", user?.id));
                 const querySnapshot = await getDocs(q);
                 const jobs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setJobApplications(jobs); 
+                setJobApplications(jobs);
             } catch (error) {
                 console.error("Error fetching documents: ", error);
             }
@@ -88,7 +88,7 @@ export default function TrackApplications() {
             pay,
             stage,
             status,
-            userId: user.id, 
+            userId: user.id,
         };
 
         try {
@@ -163,142 +163,143 @@ export default function TrackApplications() {
                     Add Job
                 </Button>
 
-                <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                        <TableHead>
-                            <TableRow>
-                                <StyledTableCell>Job Title</StyledTableCell>
-                                <StyledTableCell align="right">Company</StyledTableCell>
-                                <StyledTableCell align="right">Location</StyledTableCell>
-                                <StyledTableCell align="right">Pay</StyledTableCell>
-                                <StyledTableCell align="right">Stage</StyledTableCell>
-                                <StyledTableCell align="right">Status</StyledTableCell>
-                                <StyledTableCell align="right">Actions</StyledTableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {jobApplications.map((jobApp, index) => (
-                                <StyledTableRow key={index}>
-                                    {editRowIndex === index ? (
-                                        <>
-                                            <StyledTableCell component="th" scope="row">
-                                                <TextField
-                                                    fullWidth
-                                                    value={jobApp.jobTitle}
-                                                    onChange={(e) =>
-                                                        handleFieldChange(index, 'jobTitle', e.target.value)
-                                                    }
-                                                />
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                <TextField
-                                                    fullWidth
-                                                    value={jobApp.company}
-                                                    onChange={(e) =>
-                                                        handleFieldChange(index, 'company', e.target.value)
-                                                    }
-                                                />
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                <TextField
-                                                    fullWidth
-                                                    value={jobApp.location}
-                                                    onChange={(e) =>
-                                                        handleFieldChange(index, 'location', e.target.value)
-                                                    }
-                                                />
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                <TextField
-                                                    fullWidth
-                                                    value={jobApp.pay}
-                                                    onChange={(e) =>
-                                                        handleFieldChange(index, 'pay', e.target.value)
-                                                    }
-                                                />
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                <Select
-                                                    value={jobApp.stage}
-                                                    onChange={(e) =>
-                                                        handleFieldChange(index, 'stage', e.target.value)
-                                                    }
-                                                    fullWidth
-                                                >
-                                                    <MenuItem value={'In Progress'}>In Progress</MenuItem>
-                                                    <MenuItem value={'Applied'}>Applied</MenuItem>
-                                                    <MenuItem value={'Interview'}>Interview</MenuItem>
-                                                    <MenuItem value={'Follow up'}>Follow up</MenuItem>
-                                                </Select>
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                <Select
-                                                    value={jobApp.status}
-                                                    onChange={(e) =>
-                                                        handleFieldChange(index, 'status', e.target.value)
-                                                    }
-                                                    fullWidth
-                                                >
-                                                    <MenuItem value={'Active'}>Active</MenuItem>
-                                                    <MenuItem value={'Rejected'}>Rejected</MenuItem>
-                                                </Select>
-                                            </StyledTableCell>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <StyledTableCell component="th" scope="row">
-                                                {jobApp.jobTitle}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                {jobApp.company}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                {jobApp.location}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                {jobApp.pay}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                {jobApp.stage}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell align="right">
-                                                {jobApp.status}
-                                            </StyledTableCell>
-                                        </>
-                                    )}
-
-                                    <StyledTableCell align="right">
+                <Box minHeight='300px' sx={{ backgroundColor: "white", borderRadius: '10px' }}>
+                    <TableContainer component={Paper}>
+                        <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                            <TableHead>
+                                <TableRow>
+                                    <StyledTableCell>Job Title</StyledTableCell>
+                                    <StyledTableCell align="right">Company</StyledTableCell>
+                                    <StyledTableCell align="right">Location</StyledTableCell>
+                                    <StyledTableCell align="right">Pay</StyledTableCell>
+                                    <StyledTableCell align="right">Stage</StyledTableCell>
+                                    <StyledTableCell align="right">Status</StyledTableCell>
+                                    <StyledTableCell align="right">Actions</StyledTableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {jobApplications.map((jobApp, index) => (
+                                    <StyledTableRow key={index}>
                                         {editRowIndex === index ? (
-                                            <IconButton onClick={() => handleUpdate(index)}>
-                                                <DoneIcon />
-                                            </IconButton>
-                                        ) : (
-                                            <IconButton
-                                                onClick={() => handleEdit(index)}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                        )}
-                                        <IconButton onClick={() => handleDelete(index)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </StyledTableCell>
-                                </StyledTableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                            <>
+                                                <StyledTableCell component="th" scope="row">
+                                                    <TextField
+                                                        fullWidth
+                                                        value={jobApp.jobTitle}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(index, 'jobTitle', e.target.value)
+                                                        }
+                                                    />
+                                                </StyledTableCell>
 
+                                                <StyledTableCell align="right">
+                                                    <TextField
+                                                        fullWidth
+                                                        value={jobApp.company}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(index, 'company', e.target.value)
+                                                        }
+                                                    />
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    <TextField
+                                                        fullWidth
+                                                        value={jobApp.location}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(index, 'location', e.target.value)
+                                                        }
+                                                    />
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    <TextField
+                                                        fullWidth
+                                                        value={jobApp.pay}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(index, 'pay', e.target.value)
+                                                        }
+                                                    />
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    <Select
+                                                        value={jobApp.stage}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(index, 'stage', e.target.value)
+                                                        }
+                                                        fullWidth
+                                                    >
+                                                        <MenuItem value={'In Progress'}>In Progress</MenuItem>
+                                                        <MenuItem value={'Applied'}>Applied</MenuItem>
+                                                        <MenuItem value={'Interview'}>Interview</MenuItem>
+                                                        <MenuItem value={'Follow up'}>Follow up</MenuItem>
+                                                    </Select>
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    <Select
+                                                        value={jobApp.status}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(index, 'status', e.target.value)
+                                                        }
+                                                        fullWidth
+                                                    >
+                                                        <MenuItem value={'Active'}>Active</MenuItem>
+                                                        <MenuItem value={'Rejected'}>Rejected</MenuItem>
+                                                    </Select>
+                                                </StyledTableCell>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <StyledTableCell component="th" scope="row">
+                                                    {jobApp.jobTitle}
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    {jobApp.company}
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    {jobApp.location}
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    {jobApp.pay}
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    {jobApp.stage}
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    {jobApp.status}
+                                                </StyledTableCell>
+                                            </>
+                                        )}
+
+                                        <StyledTableCell align="right">
+                                            {editRowIndex === index ? (
+                                                <IconButton onClick={() => handleUpdate(index)}>
+                                                    <DoneIcon />
+                                                </IconButton>
+                                            ) : (
+                                                <IconButton
+                                                    onClick={() => handleEdit(index)}
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                            )}
+                                            <IconButton onClick={() => handleDelete(index)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </StyledTableCell>
+                                    </StyledTableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
                 <Dialog open={isOpen} onClose={handleCloseDialog}>
                     <Box p={3}>
                         <Typography variant="h6" gutterBottom>
@@ -335,7 +336,7 @@ export default function TrackApplications() {
                             value={pay}
                             onChange={(e) => setPay(e.target.value)}
                         />
-                        <InputLabel id="stage-select-stage-label">Stage</InputLabel>
+                        <InputLabel id="stage-select-stage-label">Stage *</InputLabel>
                         <Select
                             labelId="select-stage-label"
                             id="select-stage"
@@ -350,7 +351,7 @@ export default function TrackApplications() {
                             <MenuItem value={'Interview'}>Interview</MenuItem>
                             <MenuItem value={'Follow up'}>Follow up</MenuItem>
                         </Select>
-                        <InputLabel id="select-status-label">Status</InputLabel>
+                        <InputLabel id="select-status-label">Status *</InputLabel>
                         <Select
                             labelId="select-status-label"
                             id="select-status"
@@ -384,6 +385,6 @@ export default function TrackApplications() {
                     </DialogActions>
                 </Dialog>
             </Box>
-        </Layout>
+        </Layout >
     );
 }

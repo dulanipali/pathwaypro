@@ -1,5 +1,5 @@
 'use client';
-import { AppBar, Container, Toolbar, Typography, Button, Box, CssBaseline } from "@mui/material";
+import { AppBar, Container, Toolbar, Typography, Button, Box, CssBaseline, Paper, Grid } from "@mui/material";
 import Link from 'next/link';
 import Head from 'next/head';
 import { useUser } from '@clerk/nextjs'; // Changed from useAuth to useUser
@@ -49,7 +49,7 @@ export default function Home() {
         <Container
             maxWidth={false}
             sx={{
-                maxHeight: '100vh',
+                minHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -76,9 +76,9 @@ export default function Home() {
                 }}
             >
                 <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', fontFamily: "'Lato', sans-serif" }}>
-                        ProPathway
-                    </Typography>
+                    <Paper elevation={0} sx={{ flexGrow: 1, backgroundColor: '#0A1128' }}>
+                        <img src="logo.png" height="40px" width="200px" />
+                    </Paper>
                     <Link href="/sign-in" passHref>
                         <Button sx={{
                             mx: 1,
@@ -104,7 +104,6 @@ export default function Home() {
                     </Link>
                 </Toolbar>
             </AppBar>
-
             <Box
                 sx={{
                     flexGrow: 1,
@@ -114,13 +113,15 @@ export default function Home() {
                     textAlign: 'center',
                     overflowX: 'hidden',
                     width: '100vw',
-                    height: '80vh',
+                    //height: '80vh',
                     padding: 0,
                     margin: 0,
                 }}
             >
                 <Box sx={{
                     backgroundColor: '#0A1128',
+                    //                background: "linear-gradient(170deg, #0A1128 32.27%, #001F54 51.49%, #034078 71.03%, #0A1128 99.51%)",
+
                     width: '100vw',
                     py: 8,
                     px: 4,
@@ -133,7 +134,7 @@ export default function Home() {
                             fontWeight: 'bold',
                             animation: `fadeIn 2s ease`,
                             fontFamily: "'Lato', sans-serif",
-                            color: 'white',
+                            color: '#FF6F42',
                         }}
                     >
                         ProPathway
@@ -146,6 +147,7 @@ export default function Home() {
                             color: 'white',
                         }}
                     >
+                        The Ultimate Job Application Tracker
                     </Typography>
                     <Button
                         variant="contained"
@@ -164,6 +166,59 @@ export default function Home() {
                         Get Started
                     </Button>
                 </Box>
+            </Box>
+
+            {/* Features Section */}
+            <Box
+                sx={{
+                    //backgroundColor: '#F7F9FC',
+                    width: '100vw',
+                    py: 8,
+                    px: 4,
+                    textAlign: 'center',
+                }}
+            >
+                <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, fontFamily: "'Lato', sans-serif" }}>
+                    Features
+                </Typography>
+                <Grid container spacing={4}>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Track Applications</Typography>
+                            <Typography variant="body1">Easily monitor the status of all your job applications in one place.</Typography>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Set Reminders</Typography>
+                            <Typography variant="body1">Never miss a follow-up or deadline with customizable reminders.</Typography>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>AI-Driven Insights</Typography>
+                            <Typography variant="body1">Get personalized job recommendations and actionable insights using AI.</Typography>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Organize Deadlines</Typography>
+                            <Typography variant="body1">View all your important deadlines in a clear, organized way.</Typography>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Follow-up Suggestions</Typography>
+                            <Typography variant="body1">Receive recommendations on when and how to follow up after an application.</Typography>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>Job History</Typography>
+                            <Typography variant="body1">Keep a historical log of all jobs applied to for reference during future applications.</Typography>
+                        </Paper>
+                    </Grid>
+                </Grid>
             </Box>
 
             <Box

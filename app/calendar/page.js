@@ -25,11 +25,13 @@ import { useUser } from '@clerk/nextjs'; // Import the user hook from Clerk
 import { db } from '../../firebase'; // Ensure Firebase is initialized correctly
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore'; // Firestore methods
 import Layout from "../propathway_layout";
+import { lightBlue } from "@mui/material/colors";
 
 const tokens = {
   orange: '#EB5E28',
+  lightBlue: '#1282A2',
   darkBlue: '#001F54',
-  textPrimary: '#000000', 
+  textPrimary: '#000000',
   textSecondary: '#4A4A4A',
 };
 
@@ -37,7 +39,7 @@ const Calendar = () => {
   const { user } = useUser(); // Get the current user from Clerk
   const [currentEvents, setCurrentEvents] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [helpDialogOpen, setHelpDialogOpen] = useState(false); 
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [deletingEventId, setDeletingEventId] = useState(null);
@@ -83,7 +85,7 @@ const Calendar = () => {
 
       setCurrentEvents(currentEvents.filter((event) => event.id !== deletingEventId));
 
-      setIsOpen(false); 
+      setIsOpen(false);
       setDeletingEventId(null);
     } catch (error) {
       console.error("Error deleting document: ", error);
@@ -182,7 +184,7 @@ const Calendar = () => {
                     variant="outlined"
                     sx={{ color: tokens.textPrimary, borderColor: tokens.textPrimary, marginTop: '10px', alignSelf: 'center' }}
                     onClick={() => {
-                      setDeletingEventId(event.id); 
+                      setDeletingEventId(event.id);
                       setIsOpen(true);
                     }}
                   >
@@ -215,18 +217,18 @@ const Calendar = () => {
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth",
             }}
-            titleFormat={{ year: 'numeric', month: 'long' }} 
+            titleFormat={{ year: 'numeric', month: 'long' }}
             initialView="dayGridMonth"
             editable={true}
             selectable={true}
             selectMirror={true}
             dayMaxEvents={true}
-            events={currentEvents} 
+            events={currentEvents}
             dateClick={handleDateClick}
             eventClick={handleEventClick} // Handle event click to edit
             eventDidMount={(info) => {
               info.el.style.backgroundColor = tokens.orange;
-              info.el.style.color = '#FFFFFF'; 
+              info.el.style.color = '#FFFFFF';
             }}
             customButtons={{
               title: {
@@ -254,7 +256,7 @@ const Calendar = () => {
           <DialogTitle>Confirm Delete Event</DialogTitle>
           <DialogContent sx={{ padding: '20px' }}>
             <Typography>Are you sure you want to delete this event?
-            ?</Typography>
+              ?</Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setIsOpen(false)} color="primary">

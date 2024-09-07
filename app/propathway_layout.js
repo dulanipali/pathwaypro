@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, IconButton, Menu, MenuItem } from '@mui/material';
+import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, IconButton, Menu, MenuItem, Paper, Button } from '@mui/material';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { Logout, Menu as MenuIcon } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import { UserButton } from '@clerk/nextjs';
+import { dark, shadesOfPurple } from '@clerk/themes'
+import EventIcon from '@mui/icons-material/Event';
 
 export default function Layout({ children }) {
     const { user } = useUser();
@@ -29,7 +32,7 @@ export default function Layout({ children }) {
             disableGutters
             sx={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #0677A1, #C1C8E4,#8860D0,#84CEEB)',
+                background: "linear-gradient(170deg, #0A1128 32.27%, #001F54 51.49%, #034078 71.03%, #0A1128 99.51%)",
                 padding: 0,
                 margin: 0,
                 display: 'flex',
@@ -38,9 +41,9 @@ export default function Layout({ children }) {
         >
             <CssBaseline />
 
-            <AppBar position="static" sx={{ backgroundColor: '#464866', boxShadow: 'none', width: '100%' }}>
-                <Toolbar>
-                    <IconButton
+            <AppBar position="static" sx={{ backgroundColor: '#0A1128', boxShadow: 'none', width: '100%' }}>
+                <Toolbar >
+                    {/*<IconButton
                         size="large"
                         edge="start"
                         color="inherit"
@@ -68,7 +71,7 @@ export default function Layout({ children }) {
                         onClose={handleCloseNavMenu}
                         sx={{
                             '& .MuiPaper-root': {
-                                backgroundColor: '#464866'
+                                backgroundColor: '#0A1128'
                             }
                         }}
                     >
@@ -84,11 +87,36 @@ export default function Layout({ children }) {
                         <MenuItem onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', textAlign: 'left' }}>
                             <Typography>Calendar</Typography>
                         </MenuItem>
-                    </Menu>
-
-                    <Typography variant="h6" sx={{ flexGrow: 1, fontFamily: 'Roboto, sans-serif', color: 'white' }}>
-                        ProPathway
-                    </Typography>
+                    </Menu>*/}
+                    <Paper elevation={0} sx={{ flexGrow: 1, backgroundColor: '#0A1128' }}>
+                        <img src="logo.png" height="40px" width="200px" />
+                    </Paper>
+                    {/* Navigation Items */}
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button color="inherit" onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white' }}>
+                            Dashboard
+                        </Button>
+                        <Button color="inherit" onClick={() => handleNavigation('/track')} sx={{ color: 'white' }}>
+                            Track Applications
+                        </Button>
+                        <Button color="inherit" onClick={() => handleNavigation('/resumes')} sx={{ color: 'white' }}>
+                            Application Insights
+                        </Button>
+                        <Button color="inherit" onClick={() => handleNavigation('/calendar')} sx={{ color: 'white' }}>
+                            Calendar
+                        </Button>
+                    </Box>
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={() => handleNavigation('/calendar')}
+                        sx={{
+                            ml: 2,
+                            color: 'white',
+                        }}
+                    >
+                        <EventIcon />
+                    </IconButton>
                     <IconButton
                         edge="end"
                         color="inherit"
@@ -96,10 +124,17 @@ export default function Layout({ children }) {
                         sx={{
                             ml: 2,
                             color: 'white',
+                            paddingRight: '30px',
                         }}
                     >
                         <Logout />
                     </IconButton>
+                    <UserButton
+                        appearance={{
+                            baseTheme: [dark],
+                            variables: { colorBackground: '#0A1128' }
+                        }}
+                    />
                 </Toolbar>
             </AppBar>
 

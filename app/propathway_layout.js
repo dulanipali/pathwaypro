@@ -1,117 +1,87 @@
-import { useState } from 'react';
-import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, IconButton, Menu, MenuItem } from '@mui/material';
+import { AppBar, Typography, Container, Toolbar, Box, CssBaseline, IconButton, Button } from '@mui/material';
 import { useUser, useClerk } from '@clerk/nextjs';
-import { Logout, Menu as MenuIcon } from '@mui/icons-material';
+import { Logout } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 export default function Layout({ children }) {
-    const { user } = useUser();
-    const { signOut } = useClerk();
-    const [anchorElNav, setAnchorElNav] = useState(null);
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
 
-    const handleOpenNavMenu = (event) => {
-        setAnchorElNav(event.currentTarget);
-    };
+  const handleNavigation = (path) => {
+    router.push(path);
+  };
 
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
-    };
+  return (
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0677A1, #C1C8E4,#8860D0,#84CEEB)',
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <CssBaseline />
 
-    const router = useRouter();
+      {/* AppBar with Direct Navigation Items */}
+      <AppBar
+        position="static"
+        sx={{ backgroundColor: '#464866', boxShadow: 'none', width: '100%' }}
+      >
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {/* Title */}
+          <Typography
+            variant="h6"
+            sx={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}
+          >
+            ProPathway
+          </Typography>
 
-    const handleNavigation = (path) => {
-        router.push(path);
-    };
+          {/* Navigation Items */}
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button color="inherit" onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white' }}>
+              Dashboard
+            </Button>
+            <Button color="inherit" onClick={() => handleNavigation('/track')} sx={{ color: 'white' }}>
+              Track Applications
+            </Button>
+            <Button color="inherit" onClick={() => handleNavigation('/resumes')} sx={{ color: 'white' }}>
+              Application Insights
+            </Button>
+            <Button color="inherit" onClick={() => handleNavigation('/calendar')} sx={{ color: 'white' }}>
+              Calendar
+            </Button>
+          </Box>
 
-    return (
-        <Container
-            maxWidth={false}
-            disableGutters
+          {/* Logout Button */}
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={() => signOut()}
             sx={{
-                minHeight: '100vh',
-                background: 'linear-gradient(135deg, #0677A1, #C1C8E4,#8860D0,#84CEEB)',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
+              ml: 2,
+              color: 'white',
             }}
-        >
-            <CssBaseline />
+          >
+            <Logout />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-            <AppBar position="static" sx={{ backgroundColor: '#464866', boxShadow: 'none', width: '100%' }}>
-                <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        aria-controls="menu-appbar"
-                        aria-haspopup="true"
-                        onClick={handleOpenNavMenu}
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon></MenuIcon>
-                    </IconButton>
-                    <Menu
-                        id="menu-appbar"
-                        anchorEl={anchorElNav}
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left',
-                        }}
-                        keepMounted
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left',
-                        }}
-                        open={Boolean(anchorElNav)}
-                        onClose={handleCloseNavMenu}
-                        sx={{
-                            '& .MuiPaper-root': {
-                                backgroundColor: '#464866'
-                            }
-                        }}
-                    >
-                        <MenuItem onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white', textAlign: 'left' }}>
-                            <Typography>Dashboard</Typography>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleNavigation('/track')} sx={{ color: 'white', textAlign: 'left' }}>
-                            <Typography>Track Applications</Typography>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleNavigation('/resumes')} sx={{ color: 'white', textAlign: 'left' }}>
-                            <Typography>Application Insights</Typography>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', textAlign: 'left' }}>
-                            <Typography>Calendar</Typography>
-                        </MenuItem>
-                    </Menu>
-
-                    <Typography variant="h6" sx={{ flexGrow: 1, fontFamily: 'Roboto, sans-serif', color: 'white' }}>
-                        ProPathway
-                    </Typography>
-                    <IconButton
-                        edge="end"
-                        color="inherit"
-                        onClick={() => signOut()}
-                        sx={{
-                            ml: 2,
-                            color: 'white',
-                        }}
-                    >
-                        <Logout />
-                    </IconButton>
-                </Toolbar>
-            </AppBar>
-
-            <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                alignItems="center"
-                sx={{ flexGrow: 1, mt: 4 }}
-            >
-                {children}
-            </Box>
-        </Container>
-    );
+      {/* Main Content Area */}
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ flexGrow: 1, mt: 4 }}
+      >
+        {children}
+      </Box>
+    </Container>
+  );
 }

@@ -35,12 +35,13 @@ export default function DashboardPage() {
         setSnackbarOpen(true);
     };
 
-    const saveResumeToFirebase = async (jobDescription, fileUrl, tips) => {
+    const saveResumeToFirebase = async (jobDescription, fileUrl, tips = [], prep = []) => {
         try {
             const docRef = await addDoc(collection(db, 'resumes'), {
                 userId: user?.id,
                 jobDescription,
                 fileUrl,
+                prep,
                 tips,
                 createdAt: new Date()
             });
@@ -53,7 +54,7 @@ export default function DashboardPage() {
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) {
-            showError("No file selected.")
+            showError("No file selected.");
             return;
         }
 
@@ -112,49 +113,73 @@ export default function DashboardPage() {
                 }
             }
         }
-
+    
         try {
             setLoading(true);
-
-            const docRef = await saveResumeToFirebase(jobDescription, fileUrl, []);
-
-            const response = await axios.post('/api/generate', {
+    
+            // Save initial data to Firebase
+            const docRef = await saveResumeToFirebase(jobDescription, fileUrl, [], []);
+    
+            // Generate resume tips
+            const tipsResponse = await axios.post('/api/generate', {
                 jobDescription,
                 resumeText,
                 documentId: docRef.id
             });
-
-            const tips = response.data.tips;
-            await updateDoc(docRef, { tips });
-
+    
+            const tips = tipsResponse.data.tips;
+    
+            // Generate interview prep questions
+            const prepResponse = await axios.post('/api/generate-interview-questions', {
+                jobDescription,
+            });
+    
+            const prep = prepResponse.data.questions;
+    
+            // Update document in Firebase with both tips and prep questions
+            await updateDoc(docRef, { tips, prep });
+    
             router.push(`/resume_tips?id=${docRef.id}`);
         } catch (error) {
             setLoading(false);
-            showError("Failed to generate tips. Please try again.")
+            showError("Failed to generate tips and interview questions. Please try again.");
         }
     };
+    
 
     const handleInterviewPrepNavigation = () => {
         router.push(`/interview_prep?jobDescription=${encodeURIComponent(jobDescription)}`);
     };
 
+    const generateInterviewPrepQuestions = async () => {
+        if (!jobDescription) {
+            showError("Please enter a job description.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Ensure that `prep` field is handled correctly here
+            const docRef = await saveResumeToFirebase(jobDescription, fileUrl, [], []);
+
+            const response = await axios.post('/api/generate-interview-questions', {
+                jobDescription,
+            });
+
+            const questions = response.data.questions;
+            await updateDoc(docRef, { prep: questions });
+
+            router.push(`/interview_prep?id=${docRef.id}`);
+        } catch (error) {
+            setLoading(false);
+            showError(`Failed to generate interview questions. Please try again. ${error.message}`);
+        }
+    };
+
     return (
         <div style={{ backgroundColor: '#2D4159', minHeight: '100vh', overflow: 'hidden' }}>
             <Layout>
-                {/*} <Typography
-                    variant="h3"
-                    sx={{
-                        color: '#FFFFFF',
-                        textAlign: 'center',
-                        //fontWeight: 'bold',
-                        //marginTop: '60px',
-                        mb: 4,
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.7)'
-                    }}
-                >
-
-                    Hi {user?.firstName}, Welcome to <span style={{ color: '#0677A1' }}>ProPathway!</span>
-                </Typography>*/}
                 <Box
                     display="flex"
                     flexDirection="column"
@@ -218,7 +243,7 @@ export default function DashboardPage() {
                                     rows={10}
                                     variant="outlined"
                                     value={jobDescription}
-                                    helperText={"Make sure to include the resposibilities"}
+                                    helperText={"Make sure to include the responsibilities"}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />

@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Button, Modal, IconButton, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Visibility, Edit, Delete, Info } from '@mui/icons-material'; // Importing icons
+import { Visibility, Edit, Delete, Info } from '@mui/icons-material';
 import Layout from '../propathway_layout';
-import { collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore"; // Import deleteDoc from Firebase
+import { collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from '../../firebase';
 import { useUser } from '@clerk/nextjs';
 import CloseIcon from '@mui/icons-material/Close';
-import "@fontsource/poppins"; // Add Poppins font
+import "@fontsource/poppins";
 
 export default function ApplicationInsights() {
     const { user } = useUser();
@@ -17,7 +17,7 @@ export default function ApplicationInsights() {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editingName, setEditingName] = useState('');
     const [insightNames, setInsightNames] = useState([]);
-    const [instructionsOpen, setInstructionsOpen] = useState(false); // For the Instructions modal
+    const [instructionsOpen, setInstructionsOpen] = useState(false);
 
     useEffect(() => {
         const savedInsightNames = JSON.parse(localStorage.getItem('insightNames')) || [];
@@ -30,11 +30,11 @@ export default function ApplicationInsights() {
                 const resumesList = querySnapshot.docs.map((doc, index) => ({
                     id: doc.id,
                     ...doc.data(),
-                    name: savedInsightNames[index] || `Insight #${index + 1}`, // Apply default name if not in local storage
-                    createdAt: doc.data().createdAt.toDate(), // Convert Firestore timestamp to Date
+                    name: savedInsightNames[index] || `Insight #${index + 1}`,
+                    createdAt: doc.data().createdAt.toDate(),
                 }));
                 setResumes(resumesList);
-                setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`)); // Default or stored names
+                setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`));
             } catch (error) {
                 console.error("Error fetching resumes:", error);
             }
@@ -61,7 +61,7 @@ export default function ApplicationInsights() {
 
     const handleEditModalOpen = (resume) => {
         setSelectedResume(resume);
-        setEditingName(insightNames[resumes.indexOf(resume)]); // Set current name for editing
+        setEditingName(insightNames[resumes.indexOf(resume)]);
         setEditModalOpen(true);
     };
 
@@ -76,28 +76,27 @@ export default function ApplicationInsights() {
         updatedNames[index] = editingName;
 
         setInsightNames(updatedNames);
-        saveInsightNamesToLocalStorage(updatedNames); // Save to local storage
+        saveInsightNamesToLocalStorage(updatedNames);
 
         setEditModalOpen(false);
     };
 
     const handleDelete = async (id) => {
         try {
-            await deleteDoc(doc(db, "resumes", id));  // Delete the document from Firestore
+            await deleteDoc(doc(db, "resumes", id));
             const indexToDelete = resumes.findIndex(resume => resume.id === id);
 
-            // Remove the deleted resume and its corresponding name
             const updatedResumes = resumes.filter(resume => resume.id !== id);
             const updatedInsightNames = insightNames.filter((_, index) => index !== indexToDelete);
 
-            setResumes(updatedResumes);  // Update the local state for resumes
-            setInsightNames(updatedInsightNames);  // Update the local state for names
-            saveInsightNamesToLocalStorage(updatedInsightNames); // Save updated names to local storage
+            setResumes(updatedResumes);
+            setInsightNames(updatedInsightNames);
+            saveInsightNamesToLocalStorage(updatedInsightNames);
 
-            setEditModalOpen(false); // Close modal after deleting
+            setEditModalOpen(false);
             console.log('Document deleted successfully');
         } catch (error) {
-            console.error("Error deleting document: ", error);  // Log if there's an error
+            console.error("Error deleting document: ", error);
         }
     };
 
@@ -123,7 +122,6 @@ export default function ApplicationInsights() {
                     minHeight: '100vh',
                 }}
             >
-                {/* Title Section */}
                 <Typography
                     variant="h3"
                     sx={{
@@ -136,7 +134,6 @@ export default function ApplicationInsights() {
                     Welcome to Application Insights
                 </Typography>
 
-                {/* Instructions Button */}
                 <Button
                     variant="outlined"
                     startIcon={<Info />}
@@ -146,7 +143,6 @@ export default function ApplicationInsights() {
                     Instructions
                 </Button>
 
-                {/* Instructions Modal */}
                 <Modal open={instructionsOpen} onClose={handleInstructionsClose}>
                     <Box
                         sx={{
@@ -155,7 +151,7 @@ export default function ApplicationInsights() {
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
                             width: '80%',
-                            bgcolor: '#FFFFFF', // White background
+                            bgcolor: '#FFFFFF',
                             boxShadow: 24,
                             p: 4,
                             borderRadius: '8px',
@@ -164,17 +160,16 @@ export default function ApplicationInsights() {
                         <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#EB5E28', mb: 2 }}>
                             How to Use Application Insights
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#000000' }}> {/* Ensuring the text is black */}
+                        <Typography variant="body1" sx={{ color: '#000000' }}>
                             This page displays all your uploaded resumes, job descriptions, and tips with the following features:
                         </Typography>
-                        <ul style={{ color: '#000000' }}> {/* Ensuring the list text is black */}
-                            <li><strong>View</strong>: Click the "View" button to see the details of the resume, including tips and the uploaded file.</li>
-                            <li><strong>Edit</strong>: Click the "Edit" button to rename your resume insight or delete it.</li>
+                        <ul style={{ color: '#000000' }}>
+                            <li><strong>Job Description/Prep</strong>: Click the "Job Description/Prep" button to see the job description, or "Resume/Tips" to view the resume and tips.</li>
+                            <li><strong>Edit</strong>: Click the "Edit" icon to rename or delete your resume insight.</li>
                         </ul>
                     </Box>
                 </Modal>
 
-                {/* Table Section */}
                 {resumes.length > 0 ? (
                     <TableContainer component={Paper} sx={{ maxWidth: '90%', marginTop: 4 }}>
                         <Table>
@@ -182,8 +177,9 @@ export default function ApplicationInsights() {
                                 <TableRow>
                                     <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>Name</TableCell>
                                     <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>Date Created</TableCell>
-                                    <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>View</TableCell>
-                                    <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>Edit</TableCell>
+                                    <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>Job Description/Prep</TableCell>
+                                    <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>Resume/Tips</TableCell>
+                                    <TableCell sx={{ backgroundColor: '#D3D3D3', color: '#0A1128', fontSize: '18px', fontWeight: 'bold' }}>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -200,20 +196,28 @@ export default function ApplicationInsights() {
                                                 variant="contained"
                                                 startIcon={<Visibility />}
                                                 sx={{ backgroundColor: '#EB5E28', color: '#FFFFFF' }}
-                                                onClick={() => handleOpen(resume)}
+                                                onClick={() => handleOpen({ ...resume, viewType: 'description' })}
                                             >
-                                                View
+                                                Job Description/Prep
                                             </Button>
                                         </TableCell>
                                         <TableCell sx={{ backgroundColor: '#FFFFFF', color: '#0A1128' }}>
                                             <Button
                                                 variant="contained"
-                                                startIcon={<Edit />}
+                                                startIcon={<Visibility />}
                                                 sx={{ backgroundColor: '#EB5E28', color: '#FFFFFF' }}
-                                                onClick={() => handleEditModalOpen(resume)}
+                                                onClick={() => handleOpen({ ...resume, viewType: 'resume' })}
                                             >
-                                                Edit
+                                                Resume/Tips
                                             </Button>
+                                        </TableCell>
+                                        <TableCell sx={{ backgroundColor: '#FFFFFF', color: '#0A1128' }}>
+                                            <IconButton
+                                                onClick={() => handleEditModalOpen(resume)}
+                                                sx={{ color: '#EB5E28' }}
+                                            >
+                                                <Edit />
+                                            </IconButton>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -226,7 +230,6 @@ export default function ApplicationInsights() {
                     </Typography>
                 )}
 
-                {/* Modal for viewing insight details */}
                 {selectedResume && (
                     <Modal
                         open={open}
@@ -262,147 +265,147 @@ export default function ApplicationInsights() {
                                 </IconButton>
                             </Box>
 
-                            {/* Job Description Section */}
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold', mb: 1 }}>
-                                    Job Description:
-                                </Typography>
-                                <Typography 
-                                    variant="body1" 
-                                    sx={{ 
-                                        backgroundColor: '#F7F7F7', 
-                                        color: '#333', 
-                                        p: 2, 
-                                        borderRadius: '8px', 
-                                        border: '1px solid #ddd',
-                                        whiteSpace: 'pre-line',
-                                        lineHeight: '1.6',
-                                        fontFamily: "'Poppins', sans-serif",
-                                    }}
-                                >
-                                    {selectedResume.jobDescription}
-                                </Typography>
-                            </Box>
-
-                            {/* Resume URL Section */}
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
-                                    Resume:
-                                </Typography>
-                                <Typography 
-                                    variant="body1" 
-                                    sx={{ 
-                                        backgroundColor: '#FFFFFF', 
-                                        color: '#333', 
-                                        p: 2, 
-                                        borderRadius: '5px',
-                                        border: '1px solid #ddd', 
-                                    }}
-                                >
-                                    <a href={selectedResume.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#EB5E28', textDecoration: 'underline', fontWeight: 'bold' }}>
-                                        View Resume
-                                    </a>
-                                </Typography>
-                            </Box>
-
-                            {/* Resume Tips Section */}
-                            {selectedResume.tips && selectedResume.tips.length > 0 && (
+                            {/* Conditional Content based on the viewType */}
+                            {selectedResume.viewType === 'description' ? (
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold', mb: 1 }}>
+                                        Job Description:
+                                    </Typography>
+                                    <Typography 
+                                        variant="body1" 
+                                        sx={{ 
+                                            backgroundColor: '#F7F7F7', 
+                                            color: '#333', 
+                                            p: 2, 
+                                            borderRadius: '8px', 
+                                            border: '1px solid #ddd',
+                                            whiteSpace: 'pre-line',
+                                            lineHeight: '1.6',
+                                            fontFamily: "'Poppins', sans-serif",
+                                        }}
+                                    >
+                                        {selectedResume.jobDescription}
+                                    </Typography>
+                                    {selectedResume.prep && selectedResume.prep.length > 0 && (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
+                                                Interview Prep:
+                                            </Typography>
+                                            <Box 
+                                                sx={{ 
+                                                    backgroundColor: '#FFFFFF', 
+                                                    p: 2, 
+                                                    borderRadius: '5px', 
+                                                    border: '1px solid #ddd', 
+                                                }}
+                                            >
+                                                <ul style={{ color: '#333', paddingLeft: '20px' }}>
+                                                    {selectedResume.prep.map((prep, index) => (
+                                                        <li key={index} style={{ marginBottom: '8px' }}>
+                                                            <Typography variant="body2">{prep}</Typography>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </Box>
+                            ) : (
                                 <Box sx={{ mb: 3 }}>
                                     <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
-                                        Resume Tips:
+                                        Resume:
                                     </Typography>
-                                    <Box 
+                                    <Typography 
+                                        variant="body1" 
                                         sx={{ 
                                             backgroundColor: '#FFFFFF', 
+                                            color: '#333', 
                                             p: 2, 
-                                            borderRadius: '5px', 
+                                            borderRadius: '5px',
                                             border: '1px solid #ddd', 
                                         }}
                                     >
-                                        <ul style={{ color: '#333', paddingLeft: '20px' }}>
-                                            {selectedResume.tips.map((tip, index) => (
-                                                <li key={index} style={{ marginBottom: '8px' }}>
-                                                    <Typography variant="body2">{tip}</Typography>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </Box>
+                                        <a href={selectedResume.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#EB5E28', textDecoration: 'underline', fontWeight: 'bold' }}>
+                                            View Resume
+                                        </a>
+                                    </Typography>
+                                    {selectedResume.tips && selectedResume.tips.length > 0 && (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
+                                                Resume Tips:
+                                            </Typography>
+                                            <Box 
+                                                sx={{ 
+                                                    backgroundColor: '#FFFFFF', 
+                                                    p: 2, 
+                                                    borderRadius: '5px', 
+                                                    border: '1px solid #ddd', 
+                                                }}
+                                            >
+                                                <ul style={{ color: '#333', paddingLeft: '20px' }}>
+                                                    {selectedResume.tips.map((tip, index) => (
+                                                        <li key={index} style={{ marginBottom: '8px' }}>
+                                                            <Typography variant="body2">{tip}</Typography>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </Box>
+                                        </Box>
+                                    )}
                                 </Box>
                             )}
                         </Box>
                     </Modal>
                 )}
 
-                {/* Edit Modal */}
                 {selectedResume && (
-                    <Modal
-                        open={editModalOpen}
-                        onClose={handleEditModalClose}
-                        aria-labelledby="edit-modal-title"
-                        aria-describedby="edit-modal-description"
-                    >
+                    <Modal open={editModalOpen} onClose={handleEditModalClose}>
                         <Box
                             sx={{
                                 position: 'absolute',
                                 top: '50%',
                                 left: '50%',
                                 transform: 'translate(-50%, -50%)',
-                                width: '90%',
-                                maxWidth: '600px',
-                                bgcolor: '#0A1128',
+                                width: '80%',
+                                maxWidth: '500px',
+                                bgcolor: '#FFFFFF',
+                                boxShadow: 24,
                                 p: 4,
-                                borderRadius: '10px',
-                                color: '#FFFFFF',
-                                border: '4px solid #EB5E28',
+                                borderRadius: '8px',
                             }}
                         >
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                <Typography id="edit-modal-title" variant="h5" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
-                                    Edit {selectedResume.name}
-                                </Typography>
-                                <IconButton onClick={handleEditModalClose} sx={{ color: '#FFFFFF' }}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </Box>
-
-                            {/* Edit Name Field */}
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#EB5E28', mb: 2 }}>
+                                Edit Insight Name
+                            </Typography>
                             <TextField
-                                variant="outlined"
-                                label="Edit Name"
+                                fullWidth
+                                label="Insight Name"
                                 value={editingName}
                                 onChange={(e) => setEditingName(e.target.value)}
-                                fullWidth
-                                sx={{
-                                    backgroundColor: '#FFFFFF',
-                                    borderRadius: '5px',
-                                    mb: 3,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: '#EB5E28',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: '#FF6F42',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: '#FF6F42',
-                                        },
-                                    },
-                                }}
+                                sx={{ mb: 2 }}
                             />
-
-                            {/* Save and Delete Buttons */}
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                                 <Button
-                                    variant="contained"
-                                    sx={{ backgroundColor: '#EB5E28', color: '#FFFFFF', mr: 2 }}
+                                    onClick={handleEditModalClose}
+                                    variant="outlined"
+                                    sx={{ mr: 2, color: '#EB5E28', borderColor: '#EB5E28' }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
                                     onClick={handleSaveName}
+                                    variant="contained"
+                                    sx={{ backgroundColor: '#EB5E28', color: '#FFFFFF' }}
                                 >
                                     Save
                                 </Button>
+                            </Box>
+                            <Box sx={{ mt: 2 }}>
                                 <Button
-                                    variant="contained"
-                                    sx={{ backgroundColor: '#D9534F', color: '#FFFFFF' }}
                                     onClick={() => handleDelete(selectedResume.id)}
+                                    variant="contained"
+                                    color="error"
+                                    sx={{ backgroundColor: '#E53935', color: '#FFFFFF' }}
                                 >
                                     Delete
                                 </Button>

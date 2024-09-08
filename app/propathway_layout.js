@@ -56,7 +56,7 @@ export default function Layout({ children }) {
                                 aria-controls="menu-appbar"
                                 aria-haspopup="true"
                                 onClick={handleOpenNavMenu}
-                                sx={{ mr: 2 }}
+                                sx={{ mr: 2, '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}
                             >
                                 <MenuIcon />
                             </IconButton>
@@ -80,16 +80,16 @@ export default function Layout({ children }) {
                                     }
                                 }}
                             >
-                                <MenuItem onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white', textAlign: 'left' }}>
+                                <MenuItem onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white', textAlign: 'left', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                     <Typography>Dashboard</Typography>
                                 </MenuItem>
-                                <MenuItem onClick={() => handleNavigation('/track')} sx={{ color: 'white', textAlign: 'left' }}>
+                                <MenuItem onClick={() => handleNavigation('/track')} sx={{ color: 'white', textAlign: 'left', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                     <Typography>Track Applications</Typography>
                                 </MenuItem>
-                                <MenuItem onClick={() => handleNavigation('/resumes')} sx={{ color: 'white', textAlign: 'left' }}>
+                                <MenuItem onClick={() => handleNavigation('/resumes')} sx={{ color: 'white', textAlign: 'left', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                     <Typography>Application Insights</Typography>
                                 </MenuItem>
-                                <MenuItem onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', textAlign: 'left' }}>
+                                <MenuItem onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', textAlign: 'left', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                     <Typography>Calendar</Typography>
                                 </MenuItem>
                             </Menu>
@@ -103,16 +103,16 @@ export default function Layout({ children }) {
                     {/* Show buttons on larger screens */}
                     {!isSmallScreen && (
                         <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Button color="inherit" onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white' }}>
+                            <Button color="inherit" onClick={() => handleNavigation('/dashboard')} sx={{ color: 'white', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                 Dashboard
                             </Button>
-                            <Button color="inherit" onClick={() => handleNavigation('/track')} sx={{ color: 'white' }}>
+                            <Button color="inherit" onClick={() => handleNavigation('/track')} sx={{ color: 'white', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                 Track Applications
                             </Button>
-                            <Button color="inherit" onClick={() => handleNavigation('/resumes')} sx={{ color: 'white' }}>
+                            <Button color="inherit" onClick={() => handleNavigation('/resumes')} sx={{ color: 'white', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                 Application Insights
                             </Button>
-                            <Button color="inherit" onClick={() => handleNavigation('/calendar')} sx={{ color: 'white' }}>
+                            <Button color="inherit" onClick={() => handleNavigation('/calendar')} sx={{ color: 'white', '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease' }}>
                                 Calendar
                                 <EventIcon sx={{ paddingRight: '30px' }} />{ /*temp padding*/}
                             </Button>
@@ -128,6 +128,7 @@ export default function Layout({ children }) {
                                 color: 'white',
                                 paddingX: '35px',
                                 paddingTop: '10px',
+                                '&:hover': { color: '#FF6F42' }, transition: 'color 0.3s ease',
                             }}
                         >
                             <EventIcon />

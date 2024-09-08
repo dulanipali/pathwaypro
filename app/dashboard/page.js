@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { Typography, Box, Button, TextField, CircularProgress, Snackbar, Alert, AppBar, Tabs, Tab } from '@mui/material';
+import { Typography, Box, Button, TextField, CircularProgress, Snackbar, Alert, AppBar, Tabs, Tab, Modal } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import UploadFile from '@mui/icons-material/UploadFile';
+import Info from '@mui/icons-material/Info';
 import axios from 'axios';
 import Layout from '../propathway_layout';
 import { useRouter } from 'next/navigation';
@@ -24,7 +25,17 @@ export default function DashboardPage() {
     const [error, setError] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [tab, setTab] = useState(0);
+    const [instructionsOpen, setInstructionsOpen] = useState(false);
+
     const router = useRouter();
+
+    const handleInstructionsOpen = () => {
+        setInstructionsOpen(true);
+    };
+
+    const handleInstructionsClose = () => {
+        setInstructionsOpen(false);
+    };
 
     const handleTabChange = (_, newValue) => {
         setTab(newValue);
@@ -165,7 +176,7 @@ export default function DashboardPage() {
                                 rows={10}
                                 variant="outlined"
                                 value={jobDescription}
-                                placeholder={"Paste full description (Responsibilities, qualifications, etc.)"}
+                                placeholder={"Full job description: Responsibilities, Qualifications etc.."}
                                 onChange={(e) => setJobDescription(e.target.value)}
                                 sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                             />
@@ -178,33 +189,95 @@ export default function DashboardPage() {
                                 {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
                             </Button>
                         </Box>
-
-                        <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', width: '48%', textAlign: 'center', color: 'white', border: '2px solid #895061' }}>
-                            <UploadFile sx={{ fontSize: 40, mb: 2 }} />
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                Upload your resume (PDF only):
-                            </Typography>
-                            <input
-                                type="file"
-                                accept=".pdf"
-                                onChange={handleFileUpload}
-                                style={{ marginBottom: '16px', color: 'white' }}
-                            />
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                Or paste your resume below:
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={10}
-                                variant="outlined"
-                                value={resumeText}
-                                onChange={(e) => setResumeText(e.target.value)}
-                                sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
-                            />
+                        <Box sx={{ padding: '20px', width: '48%', textAlign: 'center', textAlign: 'center', color: 'white', alignItems: 'center' }}>
+                            <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', color: 'white', border: '2px solid #895061', alignItems: 'center' }}>
+                                <UploadFile sx={{ fontSize: 40, mb: 2 }} />
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    Upload your resume (PDF only)
+                                </Typography>
+                                <input
+                                    type="file"
+                                    accept=".pdf"
+                                    onChange={handleFileUpload}
+                                    style={{ marginBottom: '16px', color: 'white' }}
+                                />
+                            </Box>
+                            <Typography variant="h6" sx={{ m: 2 }}>
+                                OR</Typography>
+                            <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', color: 'white', border: '2px solid #895061' }}>
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    Paste/Edit your resume
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={10}
+                                    variant="outlined"
+                                    value={resumeText}
+                                    placeholder='Paste your resume here or upload and remove personal details from the pdf'
+                                    onChange={(e) => setResumeText(e.target.value)}
+                                    sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
+                                />
+                            </Box>
                         </Box>
                     </Box>
                 </Box>
+                <Button
+                    variant="outlined"
+                    onClick={handleInstructionsOpen}
+                    sx={{
+                        position: 'fixed',
+                        bottom: 16, // Distance from the bottom of the screen
+                        right: 16,   // Distance from the left of the screen
+                        minWidth: 'auto',
+                        width: '35px',
+                        color: '#FF6F61',
+                        borderColor: '#EB5E28',
+                        '&:hover': {
+                            borderColor: '#FF6F42',
+                            backgroundColor: '#FF6F61',
+                            color: '#FFFFFF',
+                        },
+                        zIndex: 1000 // Ensure it stays on top of other elements
+                    }}
+                >
+                    <Info />
+                </Button>
+
+                <Modal open={instructionsOpen} onClose={handleInstructionsClose}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '80%',
+                            bgcolor: '#FFFFFF',
+                            boxShadow: 24,
+                            p: 4,
+                            borderRadius: '8px',
+                        }}
+                    >
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#EB5E28', mb: 2 }}>
+                            How to Generate Tips
+                        </Typography>
+                        <Typography>Switch between Resume Tips and Interview Tips</Typography>
+                        <Typography variant="body1" sx={{ color: '#000000', mt: 2, textDecoration: 'underline' }}>
+                            Resume Tips
+                        </Typography>
+                        <ul style={{ color: '#000000' }}>
+                            <li><strong>Job Description</strong>: Find a job description you are interested in and paste it.</li>
+                            <li><strong>Uploading Resume</strong>: Paste your resume OR Upload a PDF of your resume and remove your personal information.</li>
+                        </ul>
+                        <Typography variant="body1" sx={{ color: '#000000', mt: 2, textDecoration: 'underline' }}>
+                            Interview Tips
+                        </Typography>
+                        <ul style={{ color: '#000000' }}>
+                            <li><strong>Job Description</strong>: Find a job description you are interested in and paste it.</li>
+                            <li><strong>Uploading Resume</strong>: Paste your resume OR Upload a PDF of your resume and remove your personal information.</li>
+                        </ul>
+                    </Box>
+                </Modal>
             </Layout>
             <Snackbar
                 open={snackbarOpen}
@@ -216,6 +289,6 @@ export default function DashboardPage() {
                     {error}
                 </Alert>
             </Snackbar>
-        </div>
+        </div >
     );
 }

@@ -10,6 +10,10 @@ import { useState, useEffect } from "react";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useUser } from '@clerk/nextjs';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 // Styled components for table cells
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -39,6 +43,7 @@ export default function TrackApplications() {
     const [pay, setPay] = useState("");
     const [stage, setStage] = useState("");
     const [status, setStatus] = useState("");
+    const [jobDate, setJobDate] = useState(null); // For date field when status is In Progress or Interview
     const [jobApplications, setJobApplications] = useState([]);
     const [editRowIndex, setEditRowIndex] = useState(null);
     const [errorPopupOpen, setErrorPopupOpen] = useState(false);
@@ -73,6 +78,7 @@ export default function TrackApplications() {
         setPay("");
         setStage("");
         setStatus("");
+        setJobDate(null);
     };
 
     const handleAddJob = async () => {
@@ -88,6 +94,7 @@ export default function TrackApplications() {
             pay,
             stage,
             status,
+            jobDate, // Add date field if applicable
             userId: user.id,
         };
 
@@ -120,6 +127,7 @@ export default function TrackApplications() {
                 pay: jobApp.pay,
                 stage: jobApp.stage,
                 status: jobApp.status,
+                jobDate: jobApp.jobDate, // Update job date if applicable
             });
             setEditRowIndex(null);
         } catch (error) {
@@ -153,7 +161,17 @@ export default function TrackApplications() {
 
     return (
         <Layout>
-            <Box>
+            <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                gap={2}
+            >
+                <Typography variant="h4" gutterBottom sx={{ color: 'white', textAlign: 'center' }}>
+                    Track your job applications
+                </Typography>
+                <Typography sx={{ color: 'white' }}>Fill in the required fields and track the status.</Typography>
                 <Button
                     variant="contained"
                     color="primary"
@@ -163,7 +181,7 @@ export default function TrackApplications() {
                     Add Job
                 </Button>
 
-                <Box minHeight='300px' sx={{ backgroundColor: "white", borderRadius: '10px' }}>
+                <Box minHeight='300px' width='80vw' sx={{ backgroundColor: "white", borderRadius: '10px' }}>
                     <TableContainer component={Paper}>
                         <Table sx={{ minWidth: 700 }} aria-label="customized table">
                             <TableHead>
@@ -174,6 +192,7 @@ export default function TrackApplications() {
                                     <StyledTableCell align="right">Pay</StyledTableCell>
                                     <StyledTableCell align="right">Stage</StyledTableCell>
                                     <StyledTableCell align="right">Status</StyledTableCell>
+                                    <StyledTableCell align="right">Date</StyledTableCell>
                                     <StyledTableCell align="right">Actions</StyledTableCell>
                                 </TableRow>
                             </TableHead>
@@ -246,8 +265,29 @@ export default function TrackApplications() {
                                                         fullWidth
                                                     >
                                                         <MenuItem value={'Active'}>Active</MenuItem>
-                                                        <MenuItem value={'Rejected'}>Rejected</MenuItem>
+                                                        <MenuItem value={'Closed'}>Closed</MenuItem>
                                                     </Select>
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    {(jobApp.stage === 'In Progress' || jobApp.stage === 'Interview') && (
+                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                            <DemoContainer components={['DatePicker']}>
+                                                                <DatePicker
+                                                                    label="Choose Date"
+                                                                    value={jobApp.jobDate}
+                                                                    onChange={(newValue) => handleFieldChange(index, 'jobDate', newValue)}
+                                                                    renderInput={(params) => <TextField {...params} />}
+                                                                />
+                                                            </DemoContainer>
+                                                        </LocalizationProvider>
+                                                    )}
+                                                </StyledTableCell>
+
+                                                <StyledTableCell align="right">
+                                                    <IconButton onClick={() => handleUpdate(index)}>
+                                                        <DoneIcon />
+                                                    </IconButton>
                                                 </StyledTableCell>
                                             </>
                                         ) : (
@@ -255,124 +295,109 @@ export default function TrackApplications() {
                                                 <StyledTableCell component="th" scope="row">
                                                     {jobApp.jobTitle}
                                                 </StyledTableCell>
-
+                                                <StyledTableCell align="right">{jobApp.company}</StyledTableCell>
+                                                <StyledTableCell align="right">{jobApp.location}</StyledTableCell>
+                                                <StyledTableCell align="right">{jobApp.pay}</StyledTableCell>
+                                                <StyledTableCell align="right">{jobApp.stage}</StyledTableCell>
+                                                <StyledTableCell align="right">{jobApp.status}</StyledTableCell>
+                                                <StyledTableCell align="right">{jobApp.jobDate?.toDateString() || ''}</StyledTableCell>
                                                 <StyledTableCell align="right">
-                                                    {jobApp.company}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell align="right">
-                                                    {jobApp.location}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell align="right">
-                                                    {jobApp.pay}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell align="right">
-                                                    {jobApp.stage}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell align="right">
-                                                    {jobApp.status}
+                                                    <IconButton onClick={() => handleEdit(index)}>
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton onClick={() => handleDelete(index)}>
+                                                        <DeleteIcon />
+                                                    </IconButton>
                                                 </StyledTableCell>
                                             </>
                                         )}
-
-                                        <StyledTableCell align="right">
-                                            {editRowIndex === index ? (
-                                                <IconButton onClick={() => handleUpdate(index)}>
-                                                    <DoneIcon />
-                                                </IconButton>
-                                            ) : (
-                                                <IconButton
-                                                    onClick={() => handleEdit(index)}
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
-                                            )}
-                                            <IconButton onClick={() => handleDelete(index)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </StyledTableCell>
                                     </StyledTableRow>
                                 ))}
                             </TableBody>
                         </Table>
                     </TableContainer>
                 </Box>
+
                 <Dialog open={isOpen} onClose={handleCloseDialog}>
-                    <Box p={3}>
+                    <DialogContent>
                         <Typography variant="h6" gutterBottom>
                             Add New Job Application
                         </Typography>
-
                         <TextField
                             label="Job Title"
                             fullWidth
-                            margin="normal"
                             value={jobTitle}
                             onChange={(e) => setJobTitle(e.target.value)}
+                            margin="normal"
                             required
                         />
                         <TextField
                             label="Company"
                             fullWidth
-                            margin="normal"
                             value={company}
                             onChange={(e) => setCompany(e.target.value)}
+                            margin="normal"
                             required
                         />
                         <TextField
                             label="Location"
                             fullWidth
-                            margin="normal"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
+                            margin="normal"
                         />
                         <TextField
                             label="Pay"
                             fullWidth
-                            margin="normal"
                             value={pay}
                             onChange={(e) => setPay(e.target.value)}
+                            margin="normal"
                         />
-                        <InputLabel id="stage-select-stage-label">Stage *</InputLabel>
-                        <Select
-                            labelId="select-stage-label"
-                            id="select-stage"
-                            value={stage}
-                            label="Stage"
-                            onChange={(e) => setStage(e.target.value)}
-                            fullWidth
-                            required
-                        >
-                            <MenuItem value={'In Progress'}>In Progress</MenuItem>
-                            <MenuItem value={'Applied'}>Applied</MenuItem>
-                            <MenuItem value={'Interview'}>Interview</MenuItem>
-                            <MenuItem value={'Follow up'}>Follow up</MenuItem>
-                        </Select>
-                        <InputLabel id="select-status-label">Status *</InputLabel>
-                        <Select
-                            labelId="select-status-label"
-                            id="select-status"
-                            value={status}
-                            label="Status"
-                            onChange={(e) => setStatus(e.target.value)}
-                            fullWidth
-                            required
-                        >
-                            <MenuItem value={'Active'}>Active</MenuItem>
-                            <MenuItem value={'Rejected'}>Rejected</MenuItem>
-                        </Select>
-                        <Box mt={2} display="flex" justifyContent="flex-end">
-                            <Button onClick={handleCloseDialog}>Cancel</Button>
-                            <Button onClick={handleAddJob} color="primary">
-                                Add
-                            </Button>
-                        </Box>
-                    </Box>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Stage</InputLabel>
+                            <Select
+                                value={stage}
+                                required
+                                onChange={(e) => setStage(e.target.value)}
+                            >
+                                <MenuItem value={'In Progress'}>In Progress</MenuItem>
+                                <MenuItem value={'Applied'}>Applied</MenuItem>
+                                <MenuItem value={'Interview'}>Interview</MenuItem>
+                                <MenuItem value={'Follow up'}>Follow up</MenuItem>
+                            </Select>
+                        </FormControl>
+                        {(stage === 'In Progress' || stage === 'Interview') && (
+                            <TextField
+                                label={(stage == 'In Progress' ? "Apply by Date" : "Interview Date")}
+                                type="date"
+                                value={jobDate}
+                                onChange={(e) => handleFieldChange(index, 'jobDate', e.target.value)}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        )}
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Status</InputLabel>
+                            <Select
+                                value={status}
+                                required
+                                onChange={(e) => setStatus(e.target.value)}
+                            >
+                                <MenuItem value={'Active'}>Active</MenuItem>
+                                <MenuItem value={'Closed'}>Closed</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDialog} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAddJob} color="primary">
+                            Add
+                        </Button>
+                    </DialogActions>
                 </Dialog>
-
                 {/* Error Dialog for empty fields */}
                 <Dialog open={errorPopupOpen} onClose={handleCloseErrorPopup}>
                     <DialogContent>

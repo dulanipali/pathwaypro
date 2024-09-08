@@ -1,9 +1,9 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import Layout from '../propathway_layout';
 import { useState, useEffect } from 'react';
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from '../../firebase';
 
 export default function ResumeTipsPage() {
@@ -14,6 +14,8 @@ export default function ResumeTipsPage() {
     const [resumeText, setResumeText] = useState('');
     const [loading, setLoading] = useState(true);
     const [isPdf, setIsPdf] = useState(false); // Track if the file is a PDF
+    const [open, setOpen] = useState(false);
+    const [saveName, setSaveName] = useState('');
 
     useEffect(() => {
         const fetchTipsAndFile = async () => {
@@ -54,6 +56,28 @@ export default function ResumeTipsPage() {
 
     const handleInterviewPrep = () => {
         router.push('/interview_prep');
+    };
+
+    const handleSaveClick = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const handleSaveTips = async () => {
+        const id = searchParams.get('id');
+        if (id && saveName) {
+            try {
+                const docRef = doc(db, 'resumes', id);
+                await updateDoc(docRef, { saveName, tips });
+                console.log("Tips saved with name:", saveName);
+            } catch (error) {
+                console.error("Error saving tips:", error);
+            }
+        }
+        setOpen(false);
     };
 
     return (
@@ -152,8 +176,44 @@ export default function ResumeTipsPage() {
                             No tips available.
                         </Typography>
                     )}
+
+                    {/* Save Tips Button */}
+                    <Button
+                        variant="contained"
+                        sx={{ mt: 3, backgroundColor: '#EB5E28', color: '#FFF', '&:hover': { backgroundColor: '#FF6F42' } }}
+                        onClick={handleSaveClick}
+                    >
+                        Save Tips
+                    </Button>
                 </Box>
             </Box>
+
+            {/* Dialog for Saving Tips */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Save Tips</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Enter the name you would like to save these tips under:
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Save Name"
+                        type="text"
+                        fullWidth
+                        value={saveName}
+                        onChange={(e) => setSaveName(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveTips} color="primary">
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Layout>
     );
 }

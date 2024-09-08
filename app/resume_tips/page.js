@@ -11,15 +11,15 @@ export default function ResumeTipsPage() {
     const searchParams = useSearchParams();
     const [tips, setTips] = useState([]);
     const [fileUrl, setFileUrl] = useState('');
+    const [resumeText, setResumeText] = useState('');
     const [loading, setLoading] = useState(true);
-    const [isPdf, setIsPdf] = useState(true); // State to track if the file is a PDF or Word doc
+    const [isPdf, setIsPdf] = useState(false); // Track if the file is a PDF
 
     useEffect(() => {
         const fetchTipsAndFile = async () => {
             const id = searchParams.get('id');
             if (id) {
                 try {
-                    // Fetch the document from Firestore
                     const docRef = doc(db, 'resumes', id);
                     const docSnap = await getDoc(docRef);
 
@@ -30,13 +30,10 @@ export default function ResumeTipsPage() {
                         }
                         if (data.fileUrl) {
                             setFileUrl(data.fileUrl);
-
-                            // Determine if the file is a PDF or Word document
-                            if (data.fileUrl.endsWith('.pdf')) {
-                                setIsPdf(true);
-                            } else if (data.fileUrl.endsWith('.docx')) {
-                                setIsPdf(false);
-                            }
+                            setIsPdf(true);
+                        }
+                        if (data.resumeText) {
+                            setResumeText(data.resumeText);
                         }
                     } else {
                         console.log("No such document!");
@@ -62,11 +59,10 @@ export default function ResumeTipsPage() {
     return (
         <Layout>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4, mt: 4 }}>
-
-                {/* File Embed Preview (Left) */}
+                {/* Resume Preview or Plain Text */}
                 <Box
                     sx={{
-                        width: '40%',  // Adjust as needed
+                        width: '40%',
                         backgroundColor: '#0A1128',
                         p: 3,
                         borderRadius: '10px',
@@ -90,30 +86,17 @@ export default function ResumeTipsPage() {
                             Loading resume...
                         </Typography>
                     ) : fileUrl ? (
-                        <Box>
-                            {isPdf ? (
-                                <iframe
-                                    src={`${fileUrl}#zoom=50`}
-                                    width="100%"
-                                    height="600px"
-                                    style={{ border: 'none', borderRadius: '8px' }}
-                                    title="Resume Preview"
-                                />
-                            ) : (
-                                <iframe
-                                    src={`https://docs.google.com/viewer?url=${fileUrl}&embedded=true`}
-                                    width="100%"
-                                    height="600px"
-                                    style={{ border: 'none', borderRadius: '8px' }}
-                                    title="Resume Preview"
-                                />
-                            )}
-                            <Typography variant="body1" sx={{ color: 'white', mt: 2 }}>
-                                <a href={fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FF6F42', textDecoration: 'none', fontWeight: 'bold' }}>
-                                    View Full Document
-                                </a>
-                            </Typography>
-                        </Box>
+                        <iframe
+                            src={`${fileUrl}#zoom=50`}
+                            width="100%"
+                            height="600px"
+                            style={{ border: 'none', borderRadius: '8px' }}
+                            title="Resume Preview"
+                        />
+                    ) : resumeText ? (
+                        <Typography variant="body1" sx={{ color: 'white', whiteSpace: 'pre-wrap' }}>
+                            {resumeText}
+                        </Typography>
                     ) : (
                         <Typography variant="body1" sx={{ color: 'white', mb: 1 }}>
                             No resume available.
@@ -121,7 +104,7 @@ export default function ResumeTipsPage() {
                     )}
                 </Box>
 
-                {/* Tips Card (Right) */}
+                {/* Tips Section */}
                 <Box
                     sx={{
                         width: '40%',
@@ -171,7 +154,6 @@ export default function ResumeTipsPage() {
                     )}
                 </Box>
             </Box>
-
         </Layout>
     );
 }

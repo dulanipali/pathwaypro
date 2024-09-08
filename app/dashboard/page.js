@@ -233,7 +233,7 @@ export default function DashboardPage() {
                                     rows={10}
                                     variant="outlined"
                                     value={jobDescription}
-                                    helperText={"Paste full descripton (Responsibilities, qualification)"}
+                                    placeholder={"Paste full description (Responsibilities, qualifications, etc.)"}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />

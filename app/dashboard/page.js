@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Typography, Box, Button, TextField, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { Typography, Box, Button, TextField, CircularProgress, Snackbar, Alert, AppBar, Tabs, Tab } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import UploadFile from '@mui/icons-material/UploadFile';
@@ -25,8 +25,12 @@ export default function DashboardPage() {
     const [section, setSection] = useState('resumeTips');
     const [error, setError] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
-
+    const [tab, setTab] = useState(0);
     const router = useRouter();
+
+    const handleTabChange = (_, newValue) => {
+        setTab(newValue);
+    };
 
     const handleSnackbarClose = () => setSnackbarOpen(false);
 
@@ -113,39 +117,39 @@ export default function DashboardPage() {
                 }
             }
         }
-    
+
         try {
             setLoading(true);
-    
+
             // Save initial data to Firebase
             const docRef = await saveResumeToFirebase(jobDescription, fileUrl, [], []);
-    
+
             // Generate resume tips
             const tipsResponse = await axios.post('/api/generate', {
                 jobDescription,
                 resumeText,
                 documentId: docRef.id
             });
-    
+
             const tips = tipsResponse.data.tips;
-    
+
             // Generate interview prep questions
             const prepResponse = await axios.post('/api/generate-interview-questions', {
                 jobDescription,
             });
-    
+
             const prep = prepResponse.data.questions;
-    
+
             // Update document in Firebase with both tips and prep questions
             await updateDoc(docRef, { tips, prep });
-    
+
             router.push(`/resume_tips?id=${docRef.id}`);
         } catch (error) {
             setLoading(false);
             showError("Failed to generate tips and interview questions. Please try again.");
         }
     };
-    
+
 
     const handleInterviewPrepNavigation = () => {
         router.push(`/interview_prep?jobDescription=${encodeURIComponent(jobDescription)}`);
@@ -180,43 +184,29 @@ export default function DashboardPage() {
     return (
         <div style={{ backgroundColor: '#2D4159', minHeight: '100vh', overflow: 'hidden' }}>
             <Layout>
+                <AppBar position="static" sx={{ borderRadius: 1, backgroundColor: 'black' }}>
+                    <Tabs
+                        value={tab}
+                        onChange={handleTabChange}
+                        centered
+                        sx={{
+                            '.MuiTabs-flexContainer': { justifyContent: 'space-around' },
+                            '.MuiTab-root': { fontSize: '16px', color: '#ffffff' },
+                            '.Mui-selected': { color: '#FF6F61' }, //#1282A2
+                            '.MuiTabs-indicator': { backgroundColor: '#FF6F61' }
+                        }}>
+                        <Tab label="Resume Tips" />
+                        <Tab label="Interview Prep" />
+                    </Tabs>
+                </AppBar>
                 <Box
                     display="flex"
                     flexDirection="column"
                     justifyContent="center"
                     alignItems="center"
-                    sx={{ width: '90%', maxWidth: '1200px', mx: 'auto' }}
+                    sx={{ width: '90%', maxWidth: '1200px', mt: 4, mb: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                 >
-                    <Box
-                        display="flex"
-                        justifyContent="space-around"
-                        sx={{ mb: 4, width: '100%' }}
-                    >
-                        <Button
-                            variant={section === 'resumeTips' ? 'contained' : 'outlined'}
-                            sx={{
-                                backgroundColor: section === 'resumeTips' ? '#0677A1' : 'transparent',
-                                color: '#FFFFFF',
-                                '&:hover': { backgroundColor: '#78244C' }
-                            }}
-                            onClick={() => setSection('resumeTips')}
-                        >
-                            Resume Tips
-                        </Button>
-                        <Button
-                            variant={section === 'interviewTips' ? 'contained' : 'outlined'}
-                            sx={{
-                                backgroundColor: section === 'interviewTips' ? '#895061' : 'transparent',
-                                color: '#FFFFFF',
-                                '&:hover': { backgroundColor: '#59253A' }
-                            }}
-                            onClick={() => setSection('interviewTips')}
-                        >
-                            Interview Prep
-                        </Button>
-                    </Box>
-
-                    {section === 'resumeTips' && (
+                    {tab === 0 && (
                         <Box
                             display="flex"
                             justifyContent="space-around"
@@ -243,10 +233,18 @@ export default function DashboardPage() {
                                     rows={10}
                                     variant="outlined"
                                     value={jobDescription}
-                                    helperText={"Make sure to include the responsibilities"}
+                                    helperText={"Paste full descripton (Responsibilities, qualification)"}
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />
+                                <Button
+                                    variant="contained"
+                                    onClick={generateTips}
+                                    sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
+                                    disabled={loading}
+                                >
+                                    {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
+                                </Button>
                             </Box>
 
                             <Box
@@ -286,7 +284,7 @@ export default function DashboardPage() {
                         </Box>
                     )}
 
-                    {section === 'interviewTips' && (
+                    {tab === 1 && (
                         <Box
                             sx={{
                                 padding: '20px',
@@ -313,21 +311,13 @@ export default function DashboardPage() {
                             <Button
                                 variant="contained"
                                 sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
-                                onClick={handleInterviewPrepNavigation}
+                                onClick={generateInterviewPrepQuestions}
+                                disabled={loading}
                             >
-                                Get Interview Prep Tips
+                                {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
                             </Button>
                         </Box>
                     )}
-
-                    <Button
-                        variant="contained"
-                        onClick={generateTips}
-                        sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
-                        disabled={loading}
-                    >
-                        {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
-                    </Button>
                 </Box>
             </Layout>
             <Snackbar

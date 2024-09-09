@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Box, Typography, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { Box, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import Layout from '../propathway_layout';
 import { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -54,10 +54,6 @@ export default function ResumeTipsPage() {
         fetchTipsAndFile();
     }, [searchParams]);
 
-    const handleSaveClick = () => {
-        setOpen(true);
-    };
-
     const handleClose = () => {
         setOpen(false);
     };
@@ -86,7 +82,6 @@ export default function ResumeTipsPage() {
         }
         setOpen(false);
     };
-    
 
     return (
         <Layout>
@@ -184,15 +179,6 @@ export default function ResumeTipsPage() {
                             No tips available.
                         </Typography>
                     )}
-
-                    {/* Save Tips Button */}
-                    <Button
-                        variant="contained"
-                        sx={{ mt: 3, backgroundColor: '#EB5E28', color: '#FFF', '&:hover': { backgroundColor: '#FF6F42' } }}
-                        onClick={handleSaveClick}
-                    >
-                        Save Tips
-                    </Button>
                 </Box>
             </Box>
 

@@ -179,7 +179,7 @@ export default function DashboardPage() {
                         centered
                         sx={{
                             '.MuiTabs-flexContainer': { justifyContent: 'space-around' },
-                            '.MuiTab-root': { fontSize: '16px', color: '#FF6F61' }, //text
+                            '.MuiTab-root': { fontSize: '16px', color: 'white' }, //text
                             '.Mui-selected': { color: '#FF6F61' },
                             '.MuiTabs-indicator': { backgroundColor: '#FF6F61' } //underline
                         }}>
@@ -249,40 +249,44 @@ export default function DashboardPage() {
                     </Box>
                 )}
                 {tab === 1 && (
-                    <Box
-                        sx={{
-                            padding: '20px',
-                            borderRadius: '10px',
-                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                            width: '100%',
-                            textAlign: 'center',
-                            color: 'white',
-                            border: '2px solid #0677A1',
-                        }}
-                    >
-                        <Typography variant="h6" sx={{ mb: 2 }}>
-                            Paste your job description here
-                        </Typography>
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={10}
-                            variant="outlined"
-                            value={jobDescription}
-                            onChange={(e) => setJobDescription(e.target.value)}
-                            sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
-                        />
-                        <Button
-                            variant="contained"
-                            sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
-                            onClick={generateInterviewPrepQuestions}
-                            disabled={loading}
-                        >
-                            {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
-                        </Button>
+                    <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '90%', maxWidth: '1200px', mt: 4, mb: 6 }}>
+
+                        <Box display="flex" justifyContent="space-around" sx={{ mb: 4, width: '100%' }}>
+                            <Box
+                                sx={{
+                                    padding: '20px',
+                                    borderRadius: '10px',
+                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                    width: '100%',
+                                    textAlign: 'center',
+                                    color: 'white',
+                                    border: '2px solid #0677A1',
+                                }}
+                            >
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    Paste your job description here
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={10}
+                                    variant="outlined"
+                                    value={jobDescription}
+                                    onChange={(e) => setJobDescription(e.target.value)}
+                                    sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
+                                />
+                                <Button
+                                    variant="contained"
+                                    sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
+                                    onClick={generateInterviewPrepQuestions}
+                                    disabled={loading}
+                                >
+                                    {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
+                                </Button>
+                            </Box>
+                        </Box>
                     </Box>
                 )}
-
                 <Button
                     variant="outlined"
                     onClick={handleInstructionsOpen}

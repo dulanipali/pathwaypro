@@ -13,7 +13,7 @@ export default function ResumeTipsPage() {
     const [fileUrl, setFileUrl] = useState('');
     const [resumeText, setResumeText] = useState('');
     const [loading, setLoading] = useState(true);
-    const [isPdf, setIsPdf] = useState(false); // Track if the file is a PDF
+    const [isPdf, setIsPdf] = useState(false); 
     const [open, setOpen] = useState(false);
     const [saveName, setSaveName] = useState('');
 
@@ -54,10 +54,6 @@ export default function ResumeTipsPage() {
         fetchTipsAndFile();
     }, [searchParams]);
 
-    const handleInterviewPrep = () => {
-        router.push('/interview_prep');
-    };
-
     const handleSaveClick = () => {
         setOpen(true);
     };
@@ -70,15 +66,27 @@ export default function ResumeTipsPage() {
         const id = searchParams.get('id');
         if (id && saveName) {
             try {
+                // Update Firestore document
                 const docRef = doc(db, 'resumes', id);
                 await updateDoc(docRef, { saveName, tips });
                 console.log("Tips saved with name:", saveName);
+        
+                // Retrieve current names from localStorage
+                const savedInsightNames = JSON.parse(localStorage.getItem('insightNames')) || [];
+                const updatedNames = savedInsightNames.map((name, index) => {
+                    if (resumes[index]?.id === id) return saveName;
+                    return name;
+                });
+        
+                // Save updated names back to localStorage
+                localStorage.setItem('insightNames', JSON.stringify(updatedNames));
             } catch (error) {
                 console.error("Error saving tips:", error);
             }
         }
         setOpen(false);
     };
+    
 
     return (
         <Layout>

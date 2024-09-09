@@ -29,21 +29,30 @@ export default function ApplicationInsights() {
 
         const fetchResumes = async () => {
             try {
+                // Retrieve the latest saved names from localStorage
+                const savedInsightNames = JSON.parse(localStorage.getItem('insightNames')) || [];
+                console.log("Retrieved names from localStorage:", savedInsightNames); // Debugging
+                
+                // Fetch resumes from Firestore
                 const q = query(collection(db, 'resumes'), where("userId", "==", user?.id));
                 const querySnapshot = await getDocs(q);
-
+                
+                // Map the fetched resumes to include the saved names
                 const resumesList = querySnapshot.docs.map((doc, index) => ({
                     id: doc.id,
                     ...doc.data(),
-                    name: savedInsightNames[index] || `Insight #${index + 1}`,
+                    name: savedInsightNames[index] || `Insight #${index + 1}`, // Use saved name or default
                     createdAt: doc.data().createdAt.toDate(),
                 }));
+                
+                // Update state with the fetched resumes
                 setResumes(resumesList);
                 setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`));
             } catch (error) {
                 console.error("Error fetching resumes:", error);
             }
         };
+        
 
         const fetchNewResumes = async () => {
             if (user?.id) {
@@ -477,7 +486,8 @@ export default function ApplicationInsights() {
                                                 variant="body1" 
                                                 sx={{ backgroundColor: '#FFFFFF', p: 2, borderRadius: '5px', border: '1px solid #ddd' }}
                                             >
-                                                <a href={newResume.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#EB5E28', textDecoration: 'underline', fontWeight: 'bold' }}>
+                                                <a href={newResume.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#EB5E28', textDecoration:
+ 'underline', fontWeight: 'bold' }}>
                                                     View Uploaded Resume
                                                 </a>
                                             </Typography>

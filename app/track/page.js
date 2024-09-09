@@ -10,6 +10,10 @@ import { useState, useEffect } from "react";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useUser } from '@clerk/nextjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 // Styled components for table cells
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -90,7 +94,7 @@ export default function TrackApplications() {
             pay,
             stage,
             status,
-            jobDate, // Add date field if applicable
+            jobDate: jobDate ? jobDate.toISOString() : null, // Store as ISO string
             userId: user.id,
         };
 
@@ -123,7 +127,7 @@ export default function TrackApplications() {
                 pay: jobApp.pay,
                 stage: jobApp.stage,
                 status: jobApp.status,
-                jobDate: jobApp.jobDate, // Update job date if applicable
+                jobDate: jobApp.jobDate ? jobApp.jobDate.toISOString() : null, // Ensure date is stored as an ISO string
             });
             setEditRowIndex(null);
         } catch (error) {
@@ -268,14 +272,12 @@ export default function TrackApplications() {
                                                 <StyledTableCell align="right">
                                                     {(jobApp.stage === 'In Progress' || jobApp.stage === 'Interview') && (
                                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                            <DemoContainer components={['DatePicker']}>
-                                                                <DatePicker
-                                                                    label="Choose Date"
-                                                                    value={jobApp.jobDate}
-                                                                    onChange={(newValue) => handleFieldChange(index, 'jobDate', newValue)}
-                                                                    renderInput={(params) => <TextField {...params} />}
-                                                                />
-                                                            </DemoContainer>
+                                                            <DatePicker
+                                                                label="Choose Date"
+                                                                value={jobApp.jobDate ? dayjs(jobApp.jobDate) : null} // Ensure proper dayjs format
+                                                                onChange={(newValue) => handleFieldChange(index, 'jobDate', newValue)}
+                                                                renderInput={(params) => <TextField {...params} />}
+                                                            />
                                                         </LocalizationProvider>
                                                     )}
                                                 </StyledTableCell>
@@ -296,7 +298,9 @@ export default function TrackApplications() {
                                                 <StyledTableCell align="right">{jobApp.pay}</StyledTableCell>
                                                 <StyledTableCell align="right">{jobApp.stage}</StyledTableCell>
                                                 <StyledTableCell align="right">{jobApp.status}</StyledTableCell>
-                                                <StyledTableCell align="right">{jobApp.jobDate?.toDateString() || ''}</StyledTableCell>
+                                                <StyledTableCell align="right">
+                                                    {jobApp.jobDate ? new Date(jobApp.jobDate).toDateString() : ''}
+                                                </StyledTableCell>
                                                 <StyledTableCell align="right">
                                                     <IconButton onClick={() => handleEdit(index)}>
                                                         <EditIcon />
@@ -363,15 +367,14 @@ export default function TrackApplications() {
                             </Select>
                         </FormControl>
                         {(stage === 'In Progress' || stage === 'Interview') && (
-                            <TextField
-                                label={(stage == 'In Progress' ? "Apply by Date" : "Interview Date")}
-                                type="date"
-                                value={jobDate}
-                                onChange={(e) => handleFieldChange(index, 'jobDate', e.target.value)}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker
+                                    label={stage === 'In Progress' ? "Apply by Date" : "Interview Date"}
+                                    value={jobDate ? dayjs(jobDate) : null} // Ensure dayjs format
+                                    onChange={(newValue) => setJobDate(newValue)}
+                                    renderInput={(params) => <TextField {...params} />}
+                                />
+                            </LocalizationProvider>
                         )}
                         <FormControl fullWidth margin="normal">
                             <InputLabel>Status</InputLabel>

@@ -172,15 +172,14 @@ export default function DashboardPage() {
     return (
         <div style={{ backgroundColor: '#2D4159', minHeight: '100vh', overflow: 'hidden' }}>
             <Layout>
-                <AppBar position="static" sx={{ borderRadius: 1, backgroundColor: '#001F54' }}>
+                <AppBar position="static" sx={{ borderRadius: 1, backgroundColor: '#001F54', width: '90%', maxWidth: '1200px' }}>
                     <Tabs
                         value={tab}
                         onChange={handleTabChange}
                         centered
                         sx={{
                             '.MuiTabs-flexContainer': { justifyContent: 'space-around' },
-                            '.MuiTab-root': { fontSize: '16px', color: 'white' }, //text
-                            '.Mui-selected': { color: '#FF6F61' },
+                            '.MuiTab-root': { fontSize: '16px', color: 'white', '&.Mui-selected': { color: '#FF6F61' } }, //text
                             '.MuiTabs-indicator': { backgroundColor: '#FF6F61' }, //underline
                         }}>
                         <Tab label="Resume Tips" />

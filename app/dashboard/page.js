@@ -145,83 +145,144 @@ export default function DashboardPage() {
         }
     };
 
+    const handleInterviewPrepNavigation = () => {
+        router.push(`/interview_prep?jobDescription=${encodeURIComponent(jobDescription)}`);
+    };
+    const generateInterviewPrepQuestions = async () => {
+        if (!jobDescription) {
+            showError("Please enter a job description.");
+            return;
+        }
+        try {
+            setLoading(true);
+            // Ensure that `prep` field is handled correctly here
+            const docRef = await saveResumeToFirebase(jobDescription, fileUrl, [], []);
+            const response = await axios.post('/api/generate-interview-questions', {
+                jobDescription,
+            });
+            const questions = response.data.questions;
+            await updateDoc(docRef, { prep: questions });
+            router.push(`/interview_prep?id=${docRef.id}`);
+        } catch (error) {
+            setLoading(false);
+            showError(`Failed to generate interview questions. Please try again. ${error.message}`);
+        }
+    };
+
     return (
         <div style={{ backgroundColor: '#2D4159', minHeight: '100vh', overflow: 'hidden' }}>
             <Layout>
-                <AppBar position="static" sx={{ borderRadius: 1, backgroundColor: 'black' }}>
+                <AppBar position="static" sx={{ borderRadius: 1, backgroundColor: '#001F54' }}>
                     <Tabs
                         value={tab}
                         onChange={handleTabChange}
                         centered
                         sx={{
                             '.MuiTabs-flexContainer': { justifyContent: 'space-around' },
-                            '.MuiTab-root': { fontSize: '16px', color: '#ffffff' },
+                            '.MuiTab-root': { fontSize: '16px', color: '#FF6F61' }, //text
                             '.Mui-selected': { color: '#FF6F61' },
-                            '.MuiTabs-indicator': { backgroundColor: '#FF6F61' }
+                            '.MuiTabs-indicator': { backgroundColor: '#FF6F61' } //underline
                         }}>
                         <Tab label="Resume Tips" />
                         <Tab label="Interview Prep" />
                     </Tabs>
                 </AppBar>
-                <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '90%', maxWidth: '1200px', mt: 4, mb: 6 }}>
-                    <Box display="flex" justifyContent="space-around" sx={{ mb: 4, width: '100%' }}>
-                        <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', width: '48%', textAlign: 'center', color: 'white', border: '2px solid #0677A1' }}>
-                            <ContentCopy sx={{ fontSize: 40, mb: 2 }} />
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                Paste your job description here
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={10}
-                                variant="outlined"
-                                value={jobDescription}
-                                placeholder={"Full job description: Responsibilities, Qualifications etc.."}
-                                onChange={(e) => setJobDescription(e.target.value)}
-                                sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
-                            />
-                            <Button
-                                variant="contained"
-                                onClick={generateTips}
-                                sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
-                                disabled={loading}
-                            >
-                                {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
-                            </Button>
-                        </Box>
-                        <Box sx={{ padding: '20px', width: '48%', textAlign: 'center', textAlign: 'center', color: 'white', alignItems: 'center' }}>
-                            <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', color: 'white', border: '2px solid #895061', alignItems: 'center' }}>
-                                <UploadFile sx={{ fontSize: 40, mb: 2 }} />
+                {tab === 0 && (
+                    <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '90%', maxWidth: '1200px', mt: 4, mb: 6 }}>
+                        <Box display="flex" justifyContent="space-around" sx={{ mb: 4, width: '100%' }}>
+                            <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', width: '48%', textAlign: 'center', color: 'white', border: '2px solid #0677A1' }}>
+                                <ContentCopy sx={{ fontSize: 40, mb: 2 }} />
                                 <Typography variant="h6" sx={{ mb: 2 }}>
-                                    Upload your resume (PDF only)
-                                </Typography>
-                                <input
-                                    type="file"
-                                    accept=".pdf"
-                                    onChange={handleFileUpload}
-                                    style={{ marginBottom: '16px', color: 'white' }}
-                                />
-                            </Box>
-                            <Typography variant="h6" sx={{ m: 2 }}>
-                                OR</Typography>
-                            <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', color: 'white', border: '2px solid #895061' }}>
-                                <Typography variant="h6" sx={{ mb: 2 }}>
-                                    Paste/Edit your resume
+                                    Paste your job description here
                                 </Typography>
                                 <TextField
                                     fullWidth
                                     multiline
                                     rows={10}
                                     variant="outlined"
-                                    value={resumeText}
-                                    placeholder='Paste your resume here or upload and remove personal details from the pdf'
-                                    onChange={(e) => setResumeText(e.target.value)}
+                                    value={jobDescription}
+                                    placeholder={"Full job description: Responsibilities, Qualifications etc.."}
+                                    onChange={(e) => setJobDescription(e.target.value)}
                                     sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />
+                                <Button
+                                    variant="contained"
+                                    onClick={generateTips}
+                                    sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
+                                    disabled={loading}
+                                >
+                                    {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
+                                </Button>
+                            </Box>
+                            <Box sx={{ padding: '20px', width: '48%', textAlign: 'center', textAlign: 'center', color: 'white', alignItems: 'center' }}>
+                                <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', color: 'white', border: '2px solid #895061', alignItems: 'center' }}>
+                                    <UploadFile sx={{ fontSize: 40, mb: 2 }} />
+                                    <Typography variant="h6" sx={{ mb: 2 }}>
+                                        Upload your resume (PDF only)
+                                    </Typography>
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={handleFileUpload}
+                                        style={{ marginBottom: '16px', color: 'white' }}
+                                    />
+                                </Box>
+                                <Typography variant="h6" sx={{ m: 2 }}>
+                                    OR</Typography>
+                                <Box sx={{ padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', color: 'white', border: '2px solid #895061' }}>
+                                    <Typography variant="h6" sx={{ mb: 2 }}>
+                                        Paste/Edit your resume
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        rows={10}
+                                        variant="outlined"
+                                        value={resumeText}
+                                        placeholder='Paste your resume here or upload and remove personal details from the pdf'
+                                        onChange={(e) => setResumeText(e.target.value)}
+                                        sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
+                                    />
+                                </Box>
                             </Box>
                         </Box>
                     </Box>
-                </Box>
+                )}
+                {tab === 1 && (
+                    <Box
+                        sx={{
+                            padding: '20px',
+                            borderRadius: '10px',
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                            width: '100%',
+                            textAlign: 'center',
+                            color: 'white',
+                            border: '2px solid #0677A1',
+                        }}
+                    >
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                            Paste your job description here
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={10}
+                            variant="outlined"
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
+                        />
+                        <Button
+                            variant="contained"
+                            sx={{ mt: 4, backgroundColor: '#0677A1', color: '#FFFFFF', '&:hover': { backgroundColor: '#78244C' } }}
+                            onClick={generateInterviewPrepQuestions}
+                            disabled={loading}
+                        >
+                            {loading ? <CircularProgress size={24} /> : 'Generate Tips'}
+                        </Button>
+                    </Box>
+                )}
+
                 <Button
                     variant="outlined"
                     onClick={handleInstructionsOpen}

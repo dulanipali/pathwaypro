@@ -177,7 +177,7 @@ export default function TrackApplications() {
                 alignItems="center"
                 gap={2}
             >
-                <Typography variant="h4" gutterBottom sx={{ color: 'white', textAlign: 'center' }}>
+                <Typography variant="h3" gutterBottom sx={{ color: 'white', textAlign: 'center' }}>
                     Track your job applications
                 </Typography>
                 <Typography sx={{ color: 'white' }}>Fill in the required fields and track the status.</Typography>

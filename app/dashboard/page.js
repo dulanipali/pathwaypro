@@ -181,7 +181,7 @@ export default function DashboardPage() {
                             '.MuiTabs-flexContainer': { justifyContent: 'space-around' },
                             '.MuiTab-root': { fontSize: '16px', color: 'white' }, //text
                             '.Mui-selected': { color: '#FF6F61' },
-                            '.MuiTabs-indicator': { background: '#FF6F61' }, //underline
+                            '.MuiTabs-indicator': { backgroundColor: '#FF6F61' }, //underline
                         }}>
                         <Tab label="Resume Tips" />
                         <Tab label="Interview Prep" />

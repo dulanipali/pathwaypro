@@ -234,8 +234,8 @@ export default function ApplicationInsights() {
                             This page displays all your uploaded resumes, job descriptions, and tips with the following features:
                         </Typography>
                         <ul style={{ color: '#000000' }}>
-                            <li><strong>Job Description/Prep</strong>: Click the "Job Description/Prep" button to see the job description, or "Resume/Tips" to view the resume and tips.</li>
-                            <li><strong>Edit</strong>: Click the "Edit" icon to rename or delete your resume insight.</li>
+                            <li><strong>Job Description/Prep</strong>: Click the `&quot;`Job Description/Prep`&quot;` button to see the job description, or `&quot;`Resume/Tips`&quot;` to view the resume and tips.</li>
+                            <li><strong>Edit</strong>: Click the `&quot;`Edit`&quot;` icon to rename or delete your resume insight.</li>
                         </ul>
                     </Box>
                 </Modal>

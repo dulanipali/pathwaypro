@@ -314,13 +314,13 @@ const Calendar = () => {
               Welcome to the Calendar! Here’s how you can use it:
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>1. Adding an Event:</strong> Click on any date on the calendar. A dialog will open where you can enter the event name. Click "Add Event" to save it.
+              <strong>1. Adding an Event:</strong> Click on any date on the calendar. A dialog will open where you can enter the event name. Click `&quot;`Add Event`&quot;` to save it.
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>2. Viewing Events:</strong> Events are listed on the left sidebar under "Events". You can see all events scheduled on the calendar.
+              <strong>2. Viewing Events:</strong> Events are listed on the left sidebar under `&quot;`Events`&quot;`. You can see all events scheduled on the calendar.
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>3. Editing an Event:</strong> Click on an event in the calendar or sidebar to edit it. Modify the details and click "Update Event" to save changes.
+              <strong>3. Editing an Event:</strong> Click on an event in the calendar or sidebar to edit it. Modify the details and click `&quot;`Update Event`&quot;` to save changes.
             </Typography>
             <Typography variant="body2" gutterBottom>
               <strong>4. Deleting an Event:</strong> To delete an event, click on the event in the sidebar and confirm deletion in the dialog that appears.

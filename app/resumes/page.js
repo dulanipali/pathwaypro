@@ -32,11 +32,11 @@ export default function ApplicationInsights() {
                 // Retrieve the latest saved names from localStorage
                 const savedInsightNames = JSON.parse(localStorage.getItem('insightNames')) || [];
                 console.log("Retrieved names from localStorage:", savedInsightNames); // Debugging
-                
+
                 // Fetch resumes from Firestore
                 const q = query(collection(db, 'resumes'), where("userId", "==", user?.id));
                 const querySnapshot = await getDocs(q);
-                
+
                 // Map the fetched resumes to include the saved names
                 const resumesList = querySnapshot.docs.map((doc, index) => ({
                     id: doc.id,
@@ -44,7 +44,7 @@ export default function ApplicationInsights() {
                     name: savedInsightNames[index] || `Insight #${index + 1}`, // Use saved name or default
                     createdAt: doc.data().createdAt.toDate(),
                 }));
-                
+
                 // Update state with the fetched resumes
                 setResumes(resumesList);
                 setInsightNames(resumesList.map((resume, index) => savedInsightNames[index] || `Insight #${index + 1}`));
@@ -52,7 +52,7 @@ export default function ApplicationInsights() {
                 console.error("Error fetching resumes:", error);
             }
         };
-        
+
 
         const fetchNewResumes = async () => {
             if (user?.id) {
@@ -189,14 +189,13 @@ export default function ApplicationInsights() {
                     alignItems: 'center',
                     padding: '0',
                     marginTop: '-20px',
-                    backgroundColor: '#0A1128',
                     minHeight: '100vh',
                 }}
             >
                 <Typography
                     variant="h3"
                     sx={{
-                        color: '#EB5E28', 
+                        color: '#EB5E28',
                         fontFamily: "'Poppins', sans-serif",
                         paddingTop: '20px',
                         textAlign: 'center',
@@ -341,13 +340,13 @@ export default function ApplicationInsights() {
                                 <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold', mb: 1 }}>
                                     Job Description:
                                 </Typography>
-                                <Typography 
-                                    variant="body1" 
-                                    sx={{ 
-                                        backgroundColor: '#F7F7F7', 
-                                        color: '#333', 
-                                        p: 2, 
-                                        borderRadius: '8px', 
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        backgroundColor: '#F7F7F7',
+                                        color: '#333',
+                                        p: 2,
+                                        borderRadius: '8px',
                                         border: '1px solid #ddd',
                                         whiteSpace: 'pre-line',
                                         lineHeight: '1.6',
@@ -361,12 +360,12 @@ export default function ApplicationInsights() {
                                         <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold' }}>
                                             Interview Prep:
                                         </Typography>
-                                        <Box 
-                                            sx={{ 
-                                                backgroundColor: '#FFFFFF', 
-                                                p: 2, 
-                                                borderRadius: '5px', 
-                                                border: '1px solid #ddd', 
+                                        <Box
+                                            sx={{
+                                                backgroundColor: '#FFFFFF',
+                                                p: 2,
+                                                borderRadius: '5px',
+                                                border: '1px solid #ddd',
                                             }}
                                         >
                                             <ul style={{ color: '#333', paddingLeft: '20px' }}>
@@ -463,14 +462,14 @@ export default function ApplicationInsights() {
                                             <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold', mb: 1 }}>
                                                 Pasted Resume:
                                             </Typography>
-                                            <Typography 
-                                                variant="body1" 
-                                                sx={{ 
-                                                    backgroundColor: '#FFFFFF', 
-                                                    color: '#333', 
-                                                    p: 2, 
+                                            <Typography
+                                                variant="body1"
+                                                sx={{
+                                                    backgroundColor: '#FFFFFF',
+                                                    color: '#333',
+                                                    p: 2,
                                                     borderRadius: '5px',
-                                                    border: '1px solid #ddd', 
+                                                    border: '1px solid #ddd',
                                                     whiteSpace: 'pre-line'
                                                 }}
                                             >
@@ -482,12 +481,14 @@ export default function ApplicationInsights() {
                                             <Typography variant="h6" sx={{ color: '#EB5E28', fontWeight: 'bold', mb: 1 }}>
                                                 Uploaded Resume (PDF):
                                             </Typography>
-                                            <Typography 
-                                                variant="body1" 
+                                            <Typography
+                                                variant="body1"
                                                 sx={{ backgroundColor: '#FFFFFF', p: 2, borderRadius: '5px', border: '1px solid #ddd' }}
                                             >
-                                                <a href={newResume.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#EB5E28', textDecoration:
- 'underline', fontWeight: 'bold' }}>
+                                                <a href={newResume.fileUrl} target="_blank" rel="noopener noreferrer" style={{
+                                                    color: '#EB5E28', textDecoration:
+                                                        'underline', fontWeight: 'bold'
+                                                }}>
                                                     View Uploaded Resume
                                                 </a>
                                             </Typography>

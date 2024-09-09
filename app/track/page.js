@@ -113,6 +113,7 @@ export default function TrackApplications() {
 
     const handleUpdate = async (index) => {
         const jobApp = jobApplications[index];
+
         if (!jobApp.jobTitle || !jobApp.company || !jobApp.stage || !jobApp.status) {
             setErrorPopupOpen(true); // Show error popup if any required fields are empty
             return;
@@ -127,8 +128,16 @@ export default function TrackApplications() {
                 pay: jobApp.pay,
                 stage: jobApp.stage,
                 status: jobApp.status,
-                jobDate: jobApp.jobDate ? jobApp.jobDate.toISOString() : null, // Ensure date is stored as an ISO string
+                jobDate: jobApp.jobDate ? jobApp.jobDate.toISOString() : null,
             });
+
+
+            setJobApplications((prevState) => {
+                const updatedJobs = [...prevState];
+                updatedJobs[index] = jobApp;
+                return updatedJobs;
+            });
+
             setEditRowIndex(null);
         } catch (error) {
             console.error("Error updating document: ", error);

@@ -198,11 +198,25 @@ const Calendar = () => {
           <Box sx={{ marginTop: '20px' }}>
             <Button
               variant="contained"
-              sx={{ backgroundColor: tokens.orange, color: '#FFFFFF', width: '100%' }}
-              startIcon={<HelpOutlineIcon />}
+              sx={{
+                backgroundColor: tokens.orange,
+                color: '#FFFFFF',
+                width: '100%',
+                position: 'fixed',
+                bottom: 16, // Distance from the bottom of the screen
+                right: 16,   // Distance from the left of the screen
+                minWidth: 'auto',
+                width: '50px',
+                '&:hover': {
+                  borderColor: '#FF6F42',
+                  backgroundColor: '#FF6F61',
+                  color: '#FFFFFF',
+                },
+                zIndex: 1000 // Ensure it stays on top of other elements
+              }}
               onClick={openHelpDialog}
             >
-              How to Use Calendar
+              <HelpOutlineIcon fontSize="large" />
             </Button>
           </Box>
         </Box>

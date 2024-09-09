@@ -181,7 +181,7 @@ export default function DashboardPage() {
                             '.MuiTabs-flexContainer': { justifyContent: 'space-around' },
                             '.MuiTab-root': { fontSize: '16px', color: 'white' }, //text
                             '.Mui-selected': { color: '#FF6F61' },
-                            '.MuiTabs-indicator': { backgroundColor: '#FF6F61' } //underline
+                            '.MuiTabs-indicator': { background: '#FF6F61' }, //underline
                         }}>
                         <Tab label="Resume Tips" />
                         <Tab label="Interview Prep" />
@@ -272,6 +272,8 @@ export default function DashboardPage() {
                                     rows={10}
                                     variant="outlined"
                                     value={jobDescription}
+                                    placeholder={"Full job description: Responsibilities, Qualifications etc.."}
+
                                     onChange={(e) => setJobDescription(e.target.value)}
                                     sx={{ backgroundColor: '#FAF9F6', borderRadius: '5px' }}
                                 />

@@ -29,3 +29,6 @@ npm install
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+Or view the project that was deployed using vercel at [https://pathwaypro.vercel.app/]
+

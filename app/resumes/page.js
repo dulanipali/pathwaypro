@@ -195,7 +195,7 @@ export default function ApplicationInsights() {
                 <Typography
                     variant="h3"
                     sx={{
-                        color: '#EB5E28',
+                        color: '#450049',
                         fontFamily: "'Poppins', sans-serif",
                         paddingTop: '20px',
                         textAlign: 'center',
@@ -208,7 +208,7 @@ export default function ApplicationInsights() {
                     variant="outlined"
                     startIcon={<Info />}
                     onClick={handleInstructionsOpen}
-                    sx={{ mt: 2, color: '#FFFFFF', borderColor: '#EB5E28', '&:hover': { borderColor: '#FF6F42' } }}
+                    sx={{ mt: 2, color: '#ccafff', borderColor: '#1f103b', '&:hover': { borderColor: '#0c0819' } }}
                 >
                     Instructions
                 </Button>
